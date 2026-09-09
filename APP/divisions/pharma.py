@@ -1,0 +1,26 @@
+"""Division logic: Pharma (01).
+
+EDIT THIS FILE to change Pharma-specific rules. operations.py combines all
+division files automatically — nothing else needs edits.
+"""
+
+CODE = "01"
+NAME = "Pharma"
+
+# [ZDEPOTHEAD] source columns expected in the sheet.
+DEPOTHEAD_COLUMNS = ["Depot Code", "Division", "Hierarchy", "Depot Head"]
+
+# [ZEMPLOYEE] total input columns + required last char of col3 (hierarchy 1/2).
+EMPLOYEE_COLS = 33
+EMPLOYEE_SUFFIX = {"A", "B", "C", "P"}
+
+# [ZMIO_TARGET] variants detected from the col7 header text (all keywords must
+# match, first match wins — keep the more specific variant first).
+MIOTARGET_VARIANTS = {
+    "PharmaPlusHerbal": ("pharma", "herbal"),
+    "HerbalOnly": ("herbal",),
+}
+
+# [ZSD_MIO_PROD_TRG] source columns (positional mapping, 7 expected).
+ZSD_COLUMNS = ["Plant Code", "Plant Name", "Material Code", "Material Description",
+               "Market Code", "Target Quantity", "Division"]

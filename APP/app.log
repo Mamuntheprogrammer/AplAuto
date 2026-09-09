@@ -1,0 +1,196 @@
+2026-09-08 16:03:31,053 ERROR Operation ZDEPOTHEAD failed:
+Traceback (most recent call last):
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 286, in _zdepothead_template
+    colmap = _resolve_columns(df, required)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 222, in _resolve_columns
+    raise ValueError(
+ValueError: Missing required column(s): Hierarchy, Depot Head. Available: Employee ID, Depot Code, Terr. Code, Hierarchy lvl, Division, Start Date, End Date, MIO/SMIO, MIO/SMIO Ter.code, AM/SAM, AM/SAM Ter.code, SAM, SAM Ter.code, RSM/ASM, RSM/ ASM Ter.code, ASM, ASM ter Code, DSM, DSM Ter.code, SM, SM Ter.code, SSM, SSM Ter.code, AGM, AGM Ter.code, DGM, DGM Ter.code, GM, GM Ter.code, AD, AD Terr.Code, ED, ED Terr. Code
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\main.py", line 270, in on_apply
+    result = spec.func(self.source_df, **params)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 187, in op_zdepothead
+    return _zdepothead_template(df, start_date.strip(), end_date.strip(), code, name)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 290, in _zdepothead_template
+    work = _detect_header(df, required)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 270, in _detect_header
+    raise ValueError(
+ValueError: Could not find a header row with Depot Code, Division, Hierarchy, Depot Head (scanned first 50 rows). Check the sheet layout.
+
+2026-09-08 16:03:54,719 ERROR Operation ZEMPLOYEE failed:
+Traceback (most recent call last):
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\main.py", line 270, in on_apply
+    result = spec.func(self.source_df, **params)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 370, in op_zemployee
+    return _zemployee_template(df, start_date.strip(), end_date.strip(), code, name)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 555, in _zemployee_template
+    raise ValueError(
+ValueError: ZEMPLOYEE validation failed (Pharma):
+- Col4 Hierarchy must be 1..12 (rows: 496, 497, 498, 499, 500, 501, 502, 503, 504, 505…)
+- Col3 must end with A/B/C/P for Pharma when hierarchy is 1/2 (rows: 2, 3, 4, 5, 6, 7, 8, 9, 10, 11…)
+- Col5 Division must be 01/Pharma (rows: 2, 3, 4, 5, 6, 7, 8, 9, 10, 11…)
+
+2026-09-08 16:04:13,126 ERROR Operation ZEMPLOYEE failed:
+Traceback (most recent call last):
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\main.py", line 270, in on_apply
+    result = spec.func(self.source_df, **params)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 370, in op_zemployee
+    return _zemployee_template(df, start_date.strip(), end_date.strip(), code, name)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 555, in _zemployee_template
+    raise ValueError(
+ValueError: ZEMPLOYEE validation failed (Ophtha):
+- Col4 Hierarchy must be 1..12 (rows: 496, 497, 498, 499, 500, 501, 502, 503, 504, 505…)
+- Col5 Division must be 04/Ophtha (rows: 2, 3, 4, 5, 6, 7, 8, 9, 10, 11…)
+
+2026-09-08 16:11:48,624 ERROR Operation ZEMPLOYEE failed:
+Traceback (most recent call last):
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\main.py", line 270, in on_apply
+    result = spec.func(self.source_df, **params)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 370, in op_zemployee
+    return _zemployee_template(df, start_date.strip(), end_date.strip(), code, name)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 556, in _zemployee_template
+    raise ValueError(
+ValueError: ZEMPLOYEE validation failed (AG):
+- Col3 must end with G for AG when hierarchy is 1/2 (rows: 2, 3, 4, 5, 6, 7, 8, 9, 10, 11…)
+
+2026-09-08 16:14:29,104 ERROR Operation ZDEPOTHEAD failed:
+Traceback (most recent call last):
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 286, in _zdepothead_template
+    colmap = _resolve_columns(df, required)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 222, in _resolve_columns
+    raise ValueError(
+ValueError: Missing required column(s): Depot Code, Division, Hierarchy, Depot Head. Available: Unnamed: 1, Unnamed: 2, Unnamed: 3
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\main.py", line 290, in on_apply
+    result = spec.func(self.source_df, **params)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 187, in op_zdepothead
+    return _zdepothead_template(df, start_date.strip(), end_date.strip(), code, name)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 290, in _zdepothead_template
+    work = _detect_header(df, required)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 270, in _detect_header
+    raise ValueError(
+ValueError: Could not find a header row with Depot Code, Division, Hierarchy, Depot Head (scanned first 28 rows). Check the sheet layout.
+
+2026-09-08 16:14:45,237 ERROR Operation ZDEPOTHEAD failed:
+Traceback (most recent call last):
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 286, in _zdepothead_template
+    colmap = _resolve_columns(df, required)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 222, in _resolve_columns
+    raise ValueError(
+ValueError: Missing required column(s): Depot Code, Division, Hierarchy, Depot Head. Available: Unnamed: 1, Unnamed: 2, Unnamed: 3
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\main.py", line 290, in on_apply
+    result = spec.func(self.source_df, **params)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 187, in op_zdepothead
+    return _zdepothead_template(df, start_date.strip(), end_date.strip(), code, name)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 290, in _zdepothead_template
+    work = _detect_header(df, required)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 270, in _detect_header
+    raise ValueError(
+ValueError: Could not find a header row with Depot Code, Division, Hierarchy, Depot Head (scanned first 28 rows). Check the sheet layout.
+
+2026-09-08 16:17:36,857 ERROR Operation ZDEPOTHEAD failed:
+Traceback (most recent call last):
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 286, in _zdepothead_template
+    colmap = _resolve_columns(df, required)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 222, in _resolve_columns
+    raise ValueError(
+ValueError: Missing required column(s): Depot Code, Division, Hierarchy, Depot Head. Available: Unnamed: 1, Unnamed: 2, Unnamed: 3
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\main.py", line 290, in on_apply
+    result = spec.func(self.source_df, **params)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 187, in op_zdepothead
+    return _zdepothead_template(df, start_date.strip(), end_date.strip(), code, name)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 290, in _zdepothead_template
+    work = _detect_header(df, required)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 270, in _detect_header
+    raise ValueError(
+ValueError: Could not find a header row with Depot Code, Division, Hierarchy, Depot Head (scanned first 28 rows). Check the sheet layout.
+
+2026-09-08 16:47:15,610 ERROR Operation ZMIO_TARGET failed:
+Traceback (most recent call last):
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\main.py", line 292, in on_apply
+    result = spec.func(self.source_df, **params)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 651, in op_zmio_target
+    return _zmio_target_template(df, start_date.strip(), end_date.strip(), code, name)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 740, in _zmio_target_template
+    raise ValueError(
+ValueError: ZMIO_TARGET validation failed (AH):
+- Col2 Terr Code must be 7 chars (rows: 2, 3, 4, 5, 6, 7, 8, 9, 10, 11…)
+- Col3 Depot must be 4-digit (rows: 2, 3, 4, 5, 6, 7, 8, 9, 10, 11…)
+
+2026-09-08 16:47:50,195 ERROR Operation ZMIO_TARGET failed:
+Traceback (most recent call last):
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 667, in _zmio_target_template
+    _resolve_columns(df, anchor)
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 242, in _resolve_columns
+    raise ValueError(
+ValueError: Missing required column(s): Start Date, End Date. Available: Hierarchy, Division, Field Force, Designation, COL_6, COL_7
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\main.py", line 292, in on_apply
+    result = spec.func(self.source_df, **params)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 651, in op_zmio_target
+    return _zmio_target_template(df, start_date.strip(), end_date.strip(), code, name)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 670, in _zmio_target_template
+    work = _detect_header(df, anchor, tag="ZMIO_TARGET")
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 312, in _detect_header
+    raise ValueError(
+ValueError: Could not find a header row with Division, Start Date, End Date (scanned first 13 rows). Columns seen: Hierarchy, Division, Field Force, Designation, COL_6, COL_7. First row: 1 | 04 | L1 | MIO/SMIO/SIO/SSIO |  | . Check the sheet layout.
+
+2026-09-08 16:48:28,697 ERROR Operation ZMIO_TARGET failed:
+Traceback (most recent call last):
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\main.py", line 292, in on_apply
+    result = spec.func(self.source_df, **params)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 651, in op_zmio_target
+    return _zmio_target_template(df, start_date.strip(), end_date.strip(), code, name)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 740, in _zmio_target_template
+    raise ValueError(
+ValueError: ZMIO_TARGET validation failed (Ophtha):
+- Col1 MIO Code must be EM + 10 chars (rows: 331, 332)
+- Col2 Terr Code must be 7 chars (rows: 331, 332)
+- Col3 Depot must be 4-digit (rows: 331, 332)
+- Col7 Target Value must be numeric (rows: 331)
+
