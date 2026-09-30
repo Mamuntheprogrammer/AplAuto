@@ -194,3 +194,89 @@ ValueError: ZMIO_TARGET validation failed (Ophtha):
 - Col3 Depot must be 4-digit (rows: 331, 332)
 - Col7 Target Value must be numeric (rows: 331)
 
+2026-09-16 16:54:58,720 ERROR Operation Setup_validation failed:
+Traceback (most recent call last):
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\main.py", line 159, in _target
+    result = worker()
+             ^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\main.py", line 368, in <lambda>
+    lambda: spec.func(source, **params),
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 986, in op_setup_validation
+    return _setup_validation_template(df, start_date.strip(), end_date.strip(), code, name)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 1151, in _setup_validation_template
+    raise ValueError(
+ValueError: Setup_validation failed (Onco):
+- Each KUNNR must keep one TERR_CODE (1 violators, e.g. EM00000000=MT711-N,RN03001)
+
+2026-09-16 17:03:06,395 ERROR Operation SETUP_VALIDATION failed:
+Traceback (most recent call last):
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\main.py", line 172, in _target
+    result = worker()
+             ^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\main.py", line 381, in <lambda>
+    lambda: spec.func(source, **params),
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 986, in op_setup_validation
+    return _setup_validation_template(df, start_date.strip(), end_date.strip(), code, name)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 1151, in _setup_validation_template
+    raise ValueError(
+ValueError: SETUP_VALIDATION failed (Onco):
+- BEGDA must be 01.10.2026, first day of month (rows: 2, 3, 4, 5, 6, 7, 8, 9, 10, 11…)
+- ENDDA must be 31.10.2026, last day of month (rows: 2, 3, 4, 5, 6, 7, 8, 9, 10, 11…)
+
+2026-09-16 17:03:06,461 ERROR Ignored benign Tk teardown race: bad window path name ".!ctktoplevel3"
+2026-09-16 17:03:06,462 ERROR Ignored benign Tk teardown race: bad window path name ".!ctktoplevel3"
+2026-09-16 17:03:33,007 ERROR Ignored benign Tk teardown race: bad window path name ".!ctktoplevel6"
+2026-09-16 17:03:33,007 ERROR Ignored benign Tk teardown race: bad window path name ".!ctktoplevel6"
+2026-09-16 17:04:46,017 ERROR Operation SETUP_VALIDATION failed:
+Traceback (most recent call last):
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\main.py", line 172, in _target
+    result = worker()
+             ^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\main.py", line 381, in <lambda>
+    lambda: spec.func(source, **params),
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 986, in op_setup_validation
+    return _setup_validation_template(df, start_date.strip(), end_date.strip(), code, name)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 1151, in _setup_validation_template
+    raise ValueError(
+ValueError: SETUP_VALIDATION failed (Onco):
+- TERR_CODE division rule failed — non-4 must end with 01:-A/-B/-C/-P 02:-G 03:-N 04:-V 09:-L 11:-D; level 4 must start with RP/RG/RN/RV/RL/RD (rows: 24)
+- Own-level LEVELn_TERR must equal TERR_CODE (row: 24 (level 2))
+- Each KUNNR must keep one TERR_CODE (1 violators, e.g. EM00009239=PA020-N,PA020-p)
+- Parent territory mismatch (child maps to 2+ parents): L1 PA011-N -> L2 ['PA010-N', 'PA020-N']
+
+2026-09-16 17:04:46,067 ERROR Ignored benign Tk teardown race: bad window path name ".!ctktoplevel9"
+2026-09-16 17:04:46,067 ERROR Ignored benign Tk teardown race: bad window path name ".!ctktoplevel9"
+2026-09-16 17:15:21,981 ERROR Operation SETUP_VALIDATION failed:
+Traceback (most recent call last):
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\main.py", line 172, in _target
+    result = worker()
+             ^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\main.py", line 381, in <lambda>
+    lambda: spec.func(source, **params),
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 992, in op_setup_validation
+    return _setup_validation_template(df, start_date.strip(), end_date.strip(), code, name)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 1213, in _setup_validation_template
+    raise ValueError(
+ValueError: SETUP_VALIDATION failed (Onco):
+- TERR_CODE division rule failed — non-4 must end with 01:-A/-B/-C/-P 02:-G 03:-N 04:-V 09:-L 11:-D; level 4 must start with RP/RG/RN/RV/RL/RD (rows: 24)
+- Own-level LEVELn_TERR must equal TERR_CODE (row: 24 (level 2))
+- Each KUNNR must keep one TERR_CODE (1 violators): EM00009239: PA020-N (rows: 21, 22, 23, 25, 26) vs PA020-p (rows: 24)
+- Parent territory mismatch (child maps to 2+ parents): L1 PA011-N -> L2 [PA010-N (rows: 2, 4), PA020-N (rows: 3)] — look up rows 2, 3, 4
+
+2026-09-17 10:05:38,741 ERROR Ignored benign Tk teardown race: bad window path name ".!ctktoplevel2"
+2026-09-17 10:09:32,547 ERROR Ignored benign Tk teardown race: bad window path name ".!ctktoplevel2"
+2026-09-17 10:21:21,033 ERROR Ignored benign Tk teardown race: bad window path name ".!ctktoplevel2"
+2026-09-17 10:21:37,558 ERROR Ignored benign Tk teardown race: bad window path name ".!ctktoplevel3"
+2026-09-17 10:36:46,921 ERROR Ignored benign Tk teardown race: bad window path name ".!ctktoplevel3"
+2026-09-17 10:47:43,141 ERROR Ignored benign Tk teardown race: bad window path name ".!ctktoplevel3"
+2026-09-17 11:00:53,323 ERROR Ignored benign Tk teardown race: bad window path name ".!ctktoplevel3"
+2026-09-17 11:11:05,859 ERROR Ignored benign Tk teardown race: bad window path name ".!ctktoplevel3"
+2026-09-30 15:47:04,618 ERROR Ignored benign Tk teardown race: bad window path name ".!ctktoplevel6"

@@ -5,6 +5,7 @@ from __future__ import annotations
 import logging
 import re
 import threading
+import tkinter as tk
 import traceback
 from datetime import datetime
 from pathlib import Path
@@ -42,15 +43,66 @@ ACCENT = "#1f6aa5"
 SOURCE_HEADER = "#217346"  # Excel green
 RESULT_HEADER = "#2b579a"  # Office/Excel blue — distinct from source
 
+_BENIGN_TEARDOWN = (
+    "bad window path name",
+    "invalid command name",
+    "can't delete Tcl command",
+    "application has been destroyed",
+    "was deleted before its visibility changed",
+)
 
-class ExcelApp(ctk.CTk):
-    """Single-window Excel processing GUI."""
 
-    def __init__(self) -> None:
-        super().__init__()
-        self.title("Excel Processor — Modern GUI")
-        self.minsize(1200, 750)
-        self.geometry("1280x800")
+def _is_benign_teardown_msg(message: str) -> bool:
+    """True for harmless CustomTkinter/Tk races during dialog/window teardown."""
+    return any(hint in message for hint in _BENIGN_TEARDOWN)
+
+
+def _install_teardown_guards(root: ctk.CTk) -> None:
+    """Swallow benign Tk teardown races (Python callbacks AND Tcl bgerror).
+
+    CustomTkinter leaves pending `after` jobs (dpi check, animations) that
+    fire after a dialog/window is destroyed. Tcl-level `after` failures go
+    to the Tcl bgerror handler — NOT through report_callback_exception —
+    so both must be filtered.
+    """
+    _orig_report = root.report_callback_exception
+
+    def _report(exc: Any, val: Any, tb: Any) -> None:
+        if isinstance(val, tk.TclError) and _is_benign_teardown_msg(str(val)):
+            logging.error("Ignored benign Tk teardown race: %s", val)
+            return
+        _orig_report(exc, val, tb)
+
+    root.report_callback_exception = _report  # type: ignore[method-assign]
+
+    def _bgerror(*args: Any) -> None:
+        msg = " ".join(str(a) for a in args)
+        if _is_benign_teardown_msg(msg):
+            logging.error("Ignored benign Tk teardown race: %s", msg)
+            return
+        import sys
+
+        print(f"Tcl background error: {msg}", file=sys.stderr)
+
+    try:
+        root.tk.createcommand("::tk::bgerror", _bgerror)
+    except tk.TclError:
+        pass
+    try:
+        # Explicitly point this interpreter's bgerror at our filter as well,
+        # in case the default ::tk::bgerror lookup is bypassed during teardown.
+        bg_name = root.tk.createcommand("::reporting_bgerror", _bgerror)
+        root.tk.call("interp", "bgerror", "", bg_name)
+    except tk.TclError:
+        pass
+
+
+class SetupPage(ctk.CTkFrame):
+    """Setup workspace (existing Excel processing GUI) as an embeddable page."""
+
+    def __init__(self, master, on_back: Callable[[], None] | None = None) -> None:
+        super().__init__(master, fg_color="transparent")
+        self.on_back = on_back
 
         self.file_path: str = ""
         self.sheets: list[str] = []
@@ -80,6 +132,10 @@ class ExcelApp(ctk.CTk):
         bar = ctk.CTkFrame(self, corner_radius=12)
         bar.pack(fill="x", padx=12, pady=(12, 6))
 
+        ctk.CTkButton(
+            bar, text="← Back", width=80, fg_color="#3a3a3a", hover_color="#4a4a4a",
+            command=self._on_back_pressed,
+        ).pack(side="left", padx=(10, 0), pady=10)
         ctk.CTkButton(
             bar, text="📂 Import File", fg_color=ACCENT, hover_color="#185a8d",
             command=self.on_import,
@@ -152,18 +208,35 @@ class ExcelApp(ctk.CTk):
         if self._busy_overlay is not None:
             self.log("warning", "Please wait — another task is still running.")
             return
-        self._busy_overlay = BusyOverlay.show(self, message)
+        self._busy_overlay = BusyOverlay.show(self.winfo_toplevel(), message)
+        state: dict[str, Any] = {"result": None, "error": None, "done": False}
 
         def _target() -> None:
+            # Never touch Tk from this thread — just park the outcome.
             try:
-                result = worker()
-                error = None
+                state["result"] = worker()
             except Exception as exc:  # noqa: BLE001 - forwarded to on_done
-                result, error = None, exc
+                state["error"] = exc
                 self._last_tb = traceback.format_exc()
-            self.after(0, lambda: self._finish_background(on_done, result, error))
+            state["done"] = True
 
         threading.Thread(target=_target, daemon=True).start()
+        self._poll_background(on_done, state)
+
+    def _poll_background(
+        self, on_done: Callable[[Any, BaseException | None], None],
+        state: dict[str, Any],
+    ) -> None:
+        """Main-thread poll for worker completion (Tk calls stay on this thread)."""
+        if not state["done"]:
+            if self._busy_overlay is None:
+                return  # window closed mid-task — drop the outcome
+            try:
+                self.after(100, lambda: self._poll_background(on_done, state))
+            except tk.TclError:
+                pass
+            return
+        self._finish_background(on_done, state["result"], state["error"])
 
     def _finish_background(
         self, on_done: Callable[[Any, BaseException | None], None],
@@ -176,6 +249,11 @@ class ExcelApp(ctk.CTk):
         on_done(result, error)
 
     # ------------------------------------------------------------------ events
+    def _on_back_pressed(self) -> None:
+        """Page navigation back to the start page (same window, no reopen)."""
+        if self.on_back is not None:
+            self.on_back()
+
     def on_import(self) -> None:
         """Open file dialog, then load sheet names + first sheet in background."""
         if self._busy_overlay is not None:
@@ -234,7 +312,7 @@ class ExcelApp(ctk.CTk):
         self.sheet_menu.set("(no sheets)")
         self.source_table.set_dataframe(pd.DataFrame())
         self.result_table.set_dataframe(pd.DataFrame())
-        self.ops_panel.set_columns([])
+        self.ops_panel.reset_params()
         self.log("info", "Reset — file selection and views cleared.")
 
     def on_refresh(self) -> None:
@@ -290,11 +368,12 @@ class ExcelApp(ctk.CTk):
         except ValueError:
             label = "—"
         codes = division_codes(divisions)
-        dialog = ctk.CTkToplevel(self)
+        root = self.winfo_toplevel()
+        dialog = ctk.CTkToplevel(root)
         dialog.title("Confirm Period")
-        center_over(dialog, self, 380, 260)
+        center_over(dialog, root, 380, 260)
         dialog.resizable(False, False)
-        dialog.transient(self)
+        dialog.transient(root)
         dialog.grab_set()
         ctk.CTkLabel(dialog, text=op_name, font=("Segoe UI", 14, "bold")).pack(pady=(16, 4))
         ctk.CTkLabel(dialog, text=f"{start.strip()}  →  {end.strip()}",
@@ -320,7 +399,7 @@ class ExcelApp(ctk.CTk):
         ctk.CTkButton(btns, text="Cancel", width=120, fg_color="#3a3a3a",
                       command=_cancel).pack(side="left", padx=8)
         dialog.protocol("WM_DELETE_WINDOW", _cancel)
-        self.wait_window(dialog)
+        root.wait_window(dialog)
         return bool(confirmed)
 
     def on_apply(self, op_name: str, params: dict[str, Any]) -> None:
@@ -378,7 +457,7 @@ class ExcelApp(ctk.CTk):
             if isinstance(error, ValueError):  # validation: stop, log + popup with Copy
                 self.log("error", f"'{op_name}' failed: {error}")
                 logging.error("Operation %s failed:\n%s", op_name, self._last_tb)
-                show_error_dialog(self, f"{op_name} — validation failed", str(error))
+                show_error_dialog(self.winfo_toplevel(), f"{op_name} — validation failed", str(error))
             else:
                 self.log("error", f"'{op_name}' failed: {error}")
                 logging.error("Operation %s failed:\n%s", op_name, self._last_tb)
@@ -481,9 +560,83 @@ class ExcelApp(ctk.CTk):
         )
 
 
+class AppShell(ctk.CTk):
+    """Single app window; pages switch inside it (same size, no new windows)."""
+
+    def __init__(self, start_page: str = "start") -> None:
+        super().__init__()
+        self.title("Excel Processor — Modern GUI")
+        self.minsize(1200, 750)
+        self.geometry("1280x800")
+        _install_teardown_guards(self)
+        self.protocol("WM_DELETE_WINDOW", self._on_close)
+
+        container = ctk.CTkFrame(self, fg_color="transparent")
+        container.pack(fill="both", expand=True)
+        container.grid_rowconfigure(0, weight=1)
+        container.grid_columnconfigure(0, weight=1)
+
+        from ui.reporting_page import ReportingPage
+        from ui.start_window import StartPage
+
+        self.start_page = StartPage(
+            container,
+            on_open_setup=lambda: self.show("setup"),
+            on_open_reporting=lambda: self.show("reporting"),
+        )
+        self.setup_page = SetupPage(container, on_back=lambda: self.show("start"))
+        self.reporting_page = ReportingPage(
+            container, on_back=lambda: self.show("start")
+        )
+        for page in (self.start_page, self.setup_page, self.reporting_page):
+            page.grid(row=0, column=0, sticky="nsew")
+        self.show(start_page if start_page in ("start", "setup", "reporting") else "start")
+
+    def show(self, name: str) -> None:
+        """Raise one page; the window itself never closes or resizes."""
+        {"start": self.start_page, "setup": self.setup_page,
+         "reporting": self.reporting_page}[name].tkraise()
+
+    def _on_close(self) -> None:
+        """Hide instantly, cancel pending afters, then quit + destroy.
+
+        CustomTkinter leaves repeating `after` jobs (dpi checks, animations)
+        that otherwise fire on half-destroyed dialogs and print
+        'bad window path name .!ctktoplevelN' to the console.
+        """
+        try:
+            self.withdraw()
+        except Exception:
+            pass
+        try:
+            for after_id in self.tk.call("after", "info"):
+                try:
+                    self.after_cancel(after_id)
+                except Exception:
+                    pass
+        except Exception:
+            pass
+        try:
+            self.quit()
+        except Exception:
+            pass
+        try:
+            self.destroy()
+        except tk.TclError as exc:
+            if not _is_benign_teardown_msg(str(exc)):
+                raise
+
+
+# Backward-compat alias (SetupPage was previously named ExcelApp).
+ExcelApp = SetupPage
+
+
 def main() -> None:
-    """Launch the application."""
-    app = ExcelApp()
+    """Launch the single-window app (page navigation, same size)."""
+    import sys
+
+    first = "setup" if "--setup" in sys.argv else "start"
+    app = AppShell(start_page=first)
     app.mainloop()
 
 

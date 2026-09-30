@@ -25,7 +25,10 @@ class BusyOverlay:
         self.dialog.transient(parent)
         self.dialog.grab_set()
         self.dialog.protocol("WM_DELETE_WINDOW", lambda: None)  # must wait
-        self.dialog.focus_force()
+        try:
+            self.dialog.focus_force()
+        except Exception:  # noqa: BLE001 - window may already be closing
+            pass
 
     @classmethod
     def show(cls, parent: ctk.CTkBaseClass, message: str) -> "BusyOverlay":
@@ -43,6 +46,7 @@ class BusyOverlay:
         except Exception:  # noqa: BLE001
             pass
         try:
-            self.dialog.destroy()
+            if self.dialog.winfo_exists():
+                self.dialog.destroy()
         except Exception:  # noqa: BLE001
             pass

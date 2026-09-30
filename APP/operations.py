@@ -90,7 +90,7 @@ def get_operation(name: str) -> OpSpec:
 DIVISIONS: dict[str, str] = {m.NAME: m.CODE for m in MODULES}
 DIVISION_OPTIONS: list[str] = [f"{name} ({code})" for name, code in DIVISIONS.items()]
 DIVISION_NAMES: dict[str, str] = {code: name for name, code in DIVISIONS.items()}
-Z_REPORTS: set[str] = {"ZDEPOTHEAD", "ZEMPLOYEE", "ZMIO_TARGET", "ZSD_MIO_PROD_TRG"}
+Z_REPORTS: set[str] = {"ZDEPOTHEAD", "ZEMPLOYEE", "ZMIO_TARGET", "ZSD_MIO_PROD_TRG", "SETUP_VALIDATION"}
 
 DATE_FMT = "%d.%m.%Y"
 
@@ -936,6 +936,290 @@ def _zsd_template(
           f"({start_date} - {end_date})")
     template.attrs["summary"] = summary  # shown in the status log
     return template
+
+
+# === EDIT HERE [Operation: SETUP_VALIDATION | validates built ZEMPLOYEE file] ===
+# Same UI pattern as the other Z-reports: Division radio + Start/End dates.
+# Input is the ZEMPLOYEE template itself (MANDT/KUNNR/DEPOT/TERR_CODE/
+# DIVISION/BEGDA/ENDDA/HIERARCHY_LEVEL/LEVELn/LEVELn_TERR). LEVEL9 omitted.
+_SETUP_LEVEL_SLOTS = [1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15]
+_SETUP_TERR_SUFFIX: dict[str, tuple[str, ...]] = {
+    "01": ("-A", "-B", "-C", "-P"),
+    "02": ("-G",),
+    "03": ("-N",),
+    "04": ("-V",),
+    "09": ("-L",),
+    "11": ("-D",),
+}
+_SETUP_H4_PREFIX: dict[str, str] = {
+    "01": "RP", "02": "RG", "03": "RN", "04": "RV", "09": "RL", "11": "RD",
+}
+_SETUP_REQUIRED = (
+    ["MANDT", "KUNNR", "DEPOT", "TERR_CODE", "DIVISION",
+     "BEGDA", "ENDDA", "HIERARCHY_LEVEL"]
+    + [c for lv in _SETUP_LEVEL_SLOTS for c in (f"LEVEL{lv}", f"LEVEL{lv}_TERR")]
+)
+# Placeholder employee: exempt from the one-KUNNR-one-TERR_CODE rule
+# and from the misplaced-LEVEL check.
+_SETUP_EXEMPT_KUNNR = "EM00000000"
+# All hierarchy levels incl. 9 (9 has no output slot but must still be
+# scanned for misplaced KUNNR/TERR_CODE values).
+_SETUP_ALL_LEVELS = list(range(1, 16))
+
+
+def _setup_terr_ok(terr: str, div: str, is_h4: bool) -> bool:
+    """Division territory rule: H4 = RP/RG/.. prefix, else -X suffix."""
+    t = (terr or "").strip().upper()
+    if len(t) != 7:
+        return False
+    if is_h4:
+        return t.startswith(_SETUP_H4_PREFIX.get(div, ""))
+    return t[-2:] in _SETUP_TERR_SUFFIX.get(div, ())
+
+
+@register("SETUP_VALIDATION", "Setup file check — validate built ZEMPLOYEE file.", _z_params())
+def op_setup_validation(
+    df: pd.DataFrame, divisions: list[str] | str = "",
+    start_date: str = "", end_date: str = "", **_: object,
+) -> pd.DataFrame:
+    """SETUP_VALIDATION: same params/flow as other Z-reports, returns df if OK."""
+    codes = division_codes(divisions)
+    if not codes:
+        raise ValueError("Select a Division radio option.")
+    validate_period(start_date, end_date)
+    code = codes[0]
+    name = DIVISION_NAMES.get(code, code)
+    return _setup_validation_template(df, start_date.strip(), end_date.strip(), code, name)
+
+
+def _setup_validation_template(
+    df: pd.DataFrame, start_date: str, end_date: str, div_code: str, div_name: str
+) -> pd.DataFrame:
+    """Validate every SETUP_VALIDATION rule; return df copy when all pass."""
+    colmap = _resolve_columns(df, _SETUP_REQUIRED)
+    work = df.copy()
+    g = lambda logical: colmap[logical]  # noqa: E731
+
+    bad_mandt: list[int] = []
+    bad_div: list[int] = []
+    bad_emp: list[int] = []
+    bad_depot: list[int] = []
+    bad_terr_len: list[int] = []
+    bad_terr_rule: list[int] = []
+    bad_begda: list[int] = []
+    bad_endda: list[int] = []
+    bad_period: list[int] = []
+    bad_hier: list[int] = []
+    bad_eq_em: list[str] = []
+    bad_eq_terr: list[str] = []
+    bad_level_em: list[str] = []
+    bad_level_terr_len: list[str] = []
+    bad_level_terr_rule: list[str] = []
+    bad_misplaced_em: list[str] = []
+    bad_misplaced_terr: list[str] = []
+    kunnr_terrs: dict[str, set[str]] = {}
+    kunnr_terr_rows: dict[str, dict[str, list[int]]] = {}
+    parent_map: dict[tuple[int, int], dict[str, set[str]]] = {}
+    parent_rows: dict[tuple[int, int, str, str], list[int]] = {}
+    # Actual LEVELn columns present in the file (also picks up LEVEL9
+    # if present, even though it has no output slot).
+    _norms = {_norm_col(c): c for c in work.columns}
+    lvl_cols: dict[int, tuple[str | None, str | None]] = {}
+    for _lv in _SETUP_ALL_LEVELS:
+        _em = _norms.get(_norm_col(f"LEVEL{_lv}"))
+        _tr = _norms.get(_norm_col(f"LEVEL{_lv}_TERR"))
+        if _em is not None or _tr is not None:
+            lvl_cols[_lv] = (_em, _tr)
+
+    for idx, row in work.iterrows():
+        r = int(idx) + 2  # type: ignore[arg-type]
+        mandt = _to_clean_str(row[g("MANDT")])
+        kunnr = _to_clean_str(row[g("KUNNR")])
+        depot = _to_clean_str(row[g("DEPOT")])
+        terr = _to_clean_str(row[g("TERR_CODE")])
+        div = _to_clean_str(row[g("DIVISION")]).zfill(2)
+        begda_s = _to_de_date_str(row[g("BEGDA")])
+        endda_s = _to_de_date_str(row[g("ENDDA")])
+        hier_s = _to_clean_str(row[g("HIERARCHY_LEVEL")])
+
+        if mandt != "300":
+            bad_mandt.append(r)
+        if div != div_code:
+            bad_div.append(r)
+        if not re.fullmatch(r"EM[A-Za-z0-9]{8}", kunnr):
+            bad_emp.append(r)
+        if not re.fullmatch(r"\d{4}", depot):
+            bad_depot.append(r)
+        try:
+            hier = int(hier_s)
+            hier_ok = 1 <= hier <= 15
+        except (ValueError, TypeError):
+            hier_ok = False
+            hier = 0
+        if not hier_ok:
+            bad_hier.append(r)
+        if len(terr) != 7:
+            bad_terr_len.append(r)
+        elif not _setup_terr_ok(terr, div_code, hier == 4):
+            bad_terr_rule.append(r)
+        try:
+            d_beg = parse_de_date(begda_s)
+            if begda_s != start_date or d_beg.day != 1:
+                bad_begda.append(r)
+        except ValueError:
+            bad_begda.append(r)
+            d_beg = None  # type: ignore[assignment]
+        try:
+            d_end = parse_de_date(endda_s)
+            last = calendar.monthrange(d_end.year, d_end.month)[1]
+            if endda_s != end_date or d_end.day != last:
+                bad_endda.append(r)
+        except ValueError:
+            bad_endda.append(r)
+            d_end = None  # type: ignore[assignment]
+        if d_beg is not None and d_end is not None:
+            if (d_beg.year, d_beg.month) != (d_end.year, d_end.month) or d_beg > d_end:
+                bad_period.append(r)
+        if kunnr and terr and kunnr.strip().upper() != _SETUP_EXEMPT_KUNNR:
+            kunnr_terrs.setdefault(kunnr, set()).add(terr)
+            kunnr_terr_rows.setdefault(kunnr, {}).setdefault(terr, []).append(r)
+
+        terrs: dict[int, str] = {}
+        ems: dict[int, str] = {}
+        for lv in _SETUP_ALL_LEVELS:
+            em_col, tr_col = lvl_cols.get(lv, (None, None))
+            em = _to_clean_str(row[em_col]) if em_col is not None else ""
+            t = _to_clean_str(row[tr_col]) if tr_col is not None else ""
+            if em:
+                ems[lv] = em
+                if lv in _SETUP_LEVEL_SLOTS and not re.fullmatch(r"EM[A-Za-z0-9]{8}", em):
+                    bad_level_em.append(f"{r}/L{lv}")
+            if t:
+                if len(t) != 7:
+                    if lv in _SETUP_LEVEL_SLOTS:
+                        bad_level_terr_len.append(f"{r}/L{lv}")
+                elif lv in _SETUP_LEVEL_SLOTS and not _setup_terr_ok(t, div_code, lv == 4):
+                    bad_level_terr_rule.append(f"{r}/L{lv}")
+                terrs[lv] = t
+        if hier_ok and hier in _SETUP_LEVEL_SLOTS:
+            if _to_clean_str(row[g(f"LEVEL{hier}")]) != kunnr:
+                bad_eq_em.append(f"{r} (level {hier})")
+            if _to_clean_str(row[g(f"LEVEL{hier}_TERR")]) != terr:
+                bad_eq_terr.append(f"{r} (level {hier})")
+        # KUNNR/TERR_CODE must sit ONLY in their own hierarchy slot —
+        # e.g. hier 2 with KUNNR also in LEVEL1 (or TERR_CODE in
+        # LEVEL1_TERR) is wrong. Placeholder EM00000000 is exempt.
+        if hier_ok and kunnr and kunnr.strip().upper() != _SETUP_EXEMPT_KUNNR:
+            for lv, em in ems.items():
+                if lv != hier and em == kunnr:
+                    bad_misplaced_em.append(f"{r} (hier {hier}, KUNNR also in LEVEL{lv})")
+            for lv, t in terrs.items():
+                if lv != hier and t == terr:
+                    bad_misplaced_terr.append(f"{r} (hier {hier}, TERR_CODE also in LEVEL{lv}_TERR)")
+        for a, b in zip(_SETUP_LEVEL_SLOTS, _SETUP_LEVEL_SLOTS[1:]):
+            ca, cb = terrs.get(a, ""), terrs.get(b, "")
+            if ca and cb:
+                parent_map.setdefault((a, b), {}).setdefault(ca, set()).add(cb)
+                parent_rows.setdefault((a, b, ca, cb), []).append(r)
+
+    def _rows(nums: list[int]) -> str:
+        shown = ", ".join(map(str, nums[:10]))
+        return shown + ("…" if len(nums) > 10 else "")
+
+    def _tagged(items: list[str]) -> str:
+        return ", ".join(items[:10]) + ("…" if len(items) > 10 else "")
+
+    issues: list[str] = []
+    if bad_mandt:
+        issues.append(f"MANDT must be 300 (rows: {_rows(bad_mandt)})")
+    if bad_div:
+        issues.append(f"DIVISION must be {div_code}/{div_name} (rows: {_rows(bad_div)})")
+    if bad_emp:
+        issues.append(f"KUNNR must be 10 chars starting with EM (rows: {_rows(bad_emp)})")
+    if bad_depot:
+        issues.append(f"DEPOT must be 4-digit numeric (rows: {_rows(bad_depot)})")
+    if bad_hier:
+        issues.append(f"HIERARCHY_LEVEL must be 1..15 (rows: {_rows(bad_hier)})")
+    if bad_terr_len:
+        issues.append(f"TERR_CODE must be 7 chars (rows: {_rows(bad_terr_len)})")
+    if bad_terr_rule:
+        issues.append(
+            "TERR_CODE division rule failed — non-4 must end with "
+            "01:-A/-B/-C/-P 02:-G 03:-N 04:-V 09:-L 11:-D; "
+            "level 4 must start with RP/RG/RN/RV/RL/RD "
+            f"(rows: {_rows(bad_terr_rule)})"
+        )
+    if bad_begda:
+        issues.append(f"BEGDA must be {start_date}, first day of month (rows: {_rows(bad_begda)})")
+    if bad_endda:
+        issues.append(f"ENDDA must be {end_date}, last day of month (rows: {_rows(bad_endda)})")
+    if bad_period:
+        issues.append(f"BEGDA and ENDDA must be in the SAME month (rows: {_rows(bad_period)})")
+    if bad_level_em:
+        issues.append(f"LEVELn employee must be EM + 10 chars when filled (row/level: {_tagged(bad_level_em)})")
+    if bad_level_terr_len:
+        issues.append(f"LEVELn_TERR must be 7 chars when filled (row/level: {_tagged(bad_level_terr_len)})")
+    if bad_level_terr_rule:
+        issues.append(f"LEVELn_TERR division rule failed (row/level: {_tagged(bad_level_terr_rule)})")
+    if bad_eq_em:
+        issues.append(f"Own-level LEVELn must equal KUNNR (row: {_tagged(bad_eq_em)})")
+    if bad_eq_terr:
+        issues.append(f"Own-level LEVELn_TERR must equal TERR_CODE (row: {_tagged(bad_eq_terr)})")
+    if bad_misplaced_em:
+        issues.append(
+            "KUNNR sits in a wrong LEVEL slot for its HIERARCHY_LEVEL "
+            f"(row: {_tagged(bad_misplaced_em)})"
+        )
+    if bad_misplaced_terr:
+        issues.append(
+            "TERR_CODE sits in a wrong LEVELn_TERR slot for its HIERARCHY_LEVEL "
+            f"(row: {_tagged(bad_misplaced_terr)})"
+        )
+    multi = {k: sorted(v) for k, v in kunnr_terrs.items() if len(v) > 1}
+    if multi:
+        parts: list[str] = []
+        for k, v in list(multi.items())[:5]:
+            terr_parts = []
+            for t in v:
+                rows = kunnr_terr_rows.get(k, {}).get(t, [])[:10]
+                terr_parts.append(f"{t} (rows: {', '.join(map(str, rows))})")
+            parts.append(f"{k}: {' vs '.join(terr_parts)}")
+        issues.append(
+            f"Each KUNNR must keep one TERR_CODE ({len(multi)} violators): "
+            + "; ".join(parts)
+            + ("…" if len(multi) > 5 else "")
+        )
+    bad_parents: list[str] = []
+    for (a, b), mapping in parent_map.items():
+        for child, parents in mapping.items():
+            if len(parents) > 1:
+                lookups: list[str] = []
+                all_rows: set[int] = set()
+                for p in sorted(parents):
+                    rows = parent_rows.get((a, b, child, p), [])[:10]
+                    all_rows.update(parent_rows.get((a, b, child, p), []))
+                    lookups.append(f"{p} (rows: {', '.join(map(str, rows))})")
+                bad_parents.append(
+                    f"L{a} {child} -> L{b} [{', '.join(lookups)}] — look up rows "
+                    f"{', '.join(map(str, sorted(all_rows)[:10]))}"
+                )
+    if bad_parents:
+        shown = "; ".join(bad_parents[:5])
+        issues.append(
+            f"Parent territory mismatch (child maps to 2+ parents): {shown}"
+            + ("…" if len(bad_parents) > 5 else "")
+        )
+    if issues:
+        raise ValueError(
+            f"SETUP_VALIDATION failed ({div_name}):\n" + "\n".join(f"- {i}" for i in issues)
+        )
+    if work.empty:
+        raise ValueError("No data rows found.")
+    summary = f"{len(work)} rows validated OK ({div_name} {start_date} - {end_date})"
+    print(f"[SETUP_VALIDATION] {summary}")
+    out = work.copy()
+    out.attrs["summary"] = summary
+    return out
 
 
 # ---------------- end of operations.

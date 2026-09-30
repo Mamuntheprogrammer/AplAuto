@@ -36,7 +36,15 @@ def show_error_dialog(parent: ctk.CTkBaseClass, title: str, message: str) -> Non
         dialog.clipboard_clear()
         dialog.clipboard_append(message)
         copy_btn.configure(text="✓ Copied")
-        dialog.after(1500, lambda: copy_btn.configure(text="⧉ Copy"))
+
+        def _reset() -> None:
+            try:
+                if copy_btn.winfo_exists():
+                    copy_btn.configure(text="⧉ Copy")
+            except Exception:  # noqa: BLE001 - dialog already closed
+                pass
+
+        dialog.after(1500, _reset)
 
     copy_btn.configure(command=_copy)
     copy_btn.pack(side="left", padx=8)

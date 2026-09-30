@@ -22,6 +22,9 @@ class OperationsPanel(ctk.CTkFrame):
         self._on_apply = on_apply
         self._param_widgets: dict[str, Any] = {}
         self._columns: list[str] = []
+        # Preserved selections: never reset dates/division on file import,
+        # operation change, or division change. Only manual edits change them.
+        self._saved_values: dict[str, Any] = {}
 
         ctk.CTkLabel(self, text="⚙ Operations", font=("Segoe UI", 13, "bold")).pack(
             anchor="w", padx=14, pady=(12, 4)
@@ -49,9 +52,17 @@ class OperationsPanel(ctk.CTkFrame):
 
     # ------------------------------------------------------------- public API
     def set_columns(self, columns: list[str]) -> None:
-        """Refresh column choices then rebuild current param widgets."""
+        """Refresh column choices then rebuild current param widgets.
+
+        Preserves start/end dates and division selection across file imports.
+        """
         self._columns = [str(c) for c in columns]
         self._rebuild_params(self.op_menu.get())
+
+    def reset_params(self) -> None:
+        """Full reset to defaults (used only by the explicit Reset button)."""
+        self._columns = []
+        self._rebuild_params(self.op_menu.get(), preserve=False)
 
     def current_operation(self) -> str:
         """Selected operation display name."""
@@ -63,7 +74,71 @@ class OperationsPanel(ctk.CTkFrame):
             child.destroy()
         self._param_widgets = {}
 
-    def _rebuild_params(self, op_name: str) -> None:
+    def _snapshot_params(self) -> None:
+        """Remember current date/division (and other) values before rebuild."""
+        for name, widget in self._param_widgets.items():
+            try:
+                if isinstance(widget, ctk.CTkEntry):
+                    self._saved_values[name] = widget.get().strip()
+                elif isinstance(widget, ctk.StringVar):
+                    # divisions radio group
+                    self._saved_values[name] = widget.get()
+                elif isinstance(widget, ctk.CTkOptionMenu):
+                    self._saved_values[name] = widget.get()
+                elif isinstance(widget, dict):
+                    self._saved_values[name] = [
+                        c for c, v in widget.items() if v.get()
+                    ]
+            except Exception:
+                continue
+
+    def _restore_param(self, param: ParamSpec) -> None:
+        """Re-apply a preserved value after the widget was rebuilt."""
+        if param.name not in self._saved_values:
+            return
+        saved = self._saved_values[param.name]
+        widget = self._param_widgets.get(param.name)
+        if widget is None:
+            return
+        try:
+            if param.kind == "date" and isinstance(widget, ctk.CTkEntry):
+                widget.delete(0, "end")
+                widget.insert(0, str(saved))
+            elif param.kind == "divisions" and isinstance(widget, ctk.StringVar):
+                # Only restore manually chosen division; never auto-change it.
+                if str(saved) in param.options:
+                    widget.set(str(saved))
+                elif not str(saved):
+                    widget.set("")
+            elif param.kind in ("text", "number", "expression") and isinstance(
+                widget, ctk.CTkEntry
+            ):
+                widget.delete(0, "end")
+                widget.insert(0, str(saved))
+            elif param.kind in ("operator", "select") and isinstance(
+                widget, ctk.CTkOptionMenu
+            ):
+                if str(saved) in param.options:
+                    widget.set(str(saved))
+            elif param.kind == "column" and isinstance(widget, ctk.CTkOptionMenu):
+                vals = [""] + self._columns if not param.required else self._columns
+                if str(saved) in vals:
+                    widget.set(str(saved))
+            elif param.kind == "columns" and isinstance(widget, dict):
+                for col, var in widget.items():
+                    try:
+                        var.set(col in (saved or []))
+                    except Exception:
+                        continue
+        except Exception:
+            pass
+
+    def _rebuild_params(self, op_name: str, preserve: bool = True) -> None:
+        # Snapshot first so import / operation changes never reset dates/division.
+        if preserve:
+            self._snapshot_params()
+        else:
+            self._saved_values = {}
         self._clear_params()
         try:
             spec = get_operation(op_name)
@@ -72,6 +147,7 @@ class OperationsPanel(ctk.CTkFrame):
         self.desc_label.configure(text=spec.description)
         for param in spec.params:
             self._build_param(param)
+            self._restore_param(param)
 
     def _build_param(self, param: ParamSpec) -> None:
         ctk.CTkLabel(self.params_frame, text=param.label, font=("Segoe UI", 11, "bold")).pack(
@@ -131,17 +207,25 @@ class OperationsPanel(ctk.CTkFrame):
 
     # ------------------------------------------------------------------ submit
     def _pick_date(self, name: str, entry: ctk.CTkEntry) -> None:
-        """Open the calendar popup; picking Start auto-fills End with month-end."""
+        """Open the calendar popup; picking Start suggests End month-end.
+
+        Never clears a manually set End date that is already in the same month.
+        """
         selected = CalendarDialog.pick(self, entry.get().strip())
         if not selected:
             return
         entry.delete(0, "end")
         entry.insert(0, selected)
         if name == "start_date":
-            self._autofill_end(entry, force=True)
+            self._autofill_end(entry)
 
     def _autofill_end(self, start_entry: ctk.CTkEntry, force: bool = False) -> None:
-        """Set End date to the last day of Start's month."""
+        """Suggest End date as the last day of Start's month.
+
+        Only fills when End is empty or in a different month — a manually
+        set End date in the same month is always kept. Division changes
+        never touch dates.
+        """
         end_widget = self._param_widgets.get("end_date")
         if not isinstance(end_widget, ctk.CTkEntry):
             return
@@ -149,7 +233,7 @@ class OperationsPanel(ctk.CTkFrame):
         if start is None:
             return
         current = parse_de_date_str(end_widget.get())
-        if force or current is None or (current.year, current.month) != (start.year, start.month):
+        if current is None or (current.year, current.month) != (start.year, start.month):
             end_widget.delete(0, "end")
             end_widget.insert(0, format_de(month_last_day(start)))
 
