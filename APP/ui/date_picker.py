@@ -7,11 +7,11 @@ Monday-first grid to match the German date format.
 from __future__ import annotations
 
 import calendar as calmod
+import tkinter as tk
 from datetime import date, datetime
 from typing import Callable
 
 import customtkinter as ctk
-
 from ui.helpers import center_over
 
 WEEKDAYS = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
@@ -92,7 +92,10 @@ class CalendarDialog(ctk.CTkToplevel):
     def pick(cls, parent: ctk.CTkBaseClass, initial: str = "") -> str | None:
         """Open modally; return the picked ``DD.MM.YYYY`` string or None."""
         dialog = cls(parent, initial)
-        parent.wait_window(dialog)
+        try:
+            parent.wait_window(dialog)
+        except tk.TclError:  # noqa: BLE001 - parent/dialog torn down mid-pick
+            pass
         return dialog.result
 
     # ------------------------------------------------------------------ internals

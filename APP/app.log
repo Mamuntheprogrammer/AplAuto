@@ -280,3 +280,81 @@ ValueError: SETUP_VALIDATION failed (Onco):
 2026-09-17 11:00:53,323 ERROR Ignored benign Tk teardown race: bad window path name ".!ctktoplevel3"
 2026-09-17 11:11:05,859 ERROR Ignored benign Tk teardown race: bad window path name ".!ctktoplevel3"
 2026-09-30 15:47:04,618 ERROR Ignored benign Tk teardown race: bad window path name ".!ctktoplevel6"
+2026-10-01 12:47:39,295 ERROR Operation ZEMPLOYEE failed:
+Traceback (most recent call last):
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\main.py", line 217, in _target
+    state["result"] = worker()
+                      ^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\main.py", line 447, in <lambda>
+    lambda: spec.func(source, **params),
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 400, in op_zemployee
+    return _zemployee_template(df, start_date.strip(), end_date.strip(), code, name)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 574, in _zemployee_template
+    raise ValueError(
+ValueError: ZEMPLOYEE validation failed (Pharma):
+- Own-level ID must equal col1 (row: 2358 (level 4), 2397 (level 9), 2439 (level 9))
+- Own-level terr must equal col3 (row: 2358 (level 4), 2397 (level 9), 2439 (level 9))
+- Col1+Col2+Col3 must be unique (duplicate rows: 1540, 1541, 1542, 2411, 2439)
+
+2026-10-01 14:55:10,200 ERROR Operation ZEMPLOYEE failed:
+Traceback (most recent call last):
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\main.py", line 217, in _target
+    state["result"] = worker()
+                      ^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\main.py", line 447, in <lambda>
+    lambda: spec.func(source, **params),
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 400, in op_zemployee
+    return _zemployee_template(df, start_date.strip(), end_date.strip(), code, name)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 574, in _zemployee_template
+    raise ValueError(
+ValueError: ZEMPLOYEE validation failed (Pharma):
+- Col1 Employee must be EM + 10 chars (rows: 2, 3, 4, 5, 6, 7, 8, 9, 10, 11…)
+- Col2 Depot must be 4-digit (rows: 2, 3, 4, 5, 6, 7, 8, 9, 10, 11…)
+- Col3 Terr must be 7 chars (rows: 2, 3, 4, 5, 6, 7, 8, 9, 10, 11…)
+- Col4 Hierarchy must be 1..15 (rows: 2, 3, 4, 5, 6, 7, 8, 9, 10, 11…)
+- Level ID cols must be EM + 10 chars when filled (row/level: 2/L1, 2/L2, 2/L3, 2/L5, 2/L7, 2/L10, 3/L1, 3/L2, 3/L3, 3/L5…)
+- Level terr cols must be 7 chars when filled (row/level: 2/L1, 2/L2, 2/L4, 2/L6, 2/L7, 2/L8, 2/L9, 2/L10, 2/L11, 2/L12…)
+- Col1+Col2+Col3 must be unique (duplicate rows: 6, 12, 15, 28, 38, 57, 59, 69, 73, 83)
+
+2026-10-01 14:56:18,502 ERROR Operation ZEMPLOYEE failed:
+Traceback (most recent call last):
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\main.py", line 217, in _target
+    state["result"] = worker()
+                      ^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\main.py", line 447, in <lambda>
+    lambda: spec.func(source, **params),
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 400, in op_zemployee
+    return _zemployee_template(df, start_date.strip(), end_date.strip(), code, name)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 574, in _zemployee_template
+    raise ValueError(
+ValueError: ZEMPLOYEE validation failed (Pharma):
+- Col1+Col2+Col3 must be unique (duplicate rows: 2410, 2438)
+
+2026-10-01 14:57:47,865 ERROR Ignored benign Tk teardown race: bad window path name ".!ctktoplevel14"
+2026-10-01 14:57:47,881 ERROR Ignored benign Tk teardown race: bad window path name ".!ctktoplevel14"
+2026-10-01 15:49:27,554 ERROR Ignored benign Tk teardown race: bad window path name ".!ctktoplevel2"
+2026-10-01 15:49:27,567 ERROR Ignored benign Tk teardown race: bad window path name ".!ctktoplevel2"
+2026-10-01 15:50:50,978 ERROR Operation SETUP_VALIDATION failed:
+Traceback (most recent call last):
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\main.py", line 217, in _target
+    state["result"] = worker()
+                      ^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\main.py", line 447, in <lambda>
+    lambda: spec.func(source, **params),
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 1022, in op_setup_validation
+    return _setup_validation_template(df, start_date.strip(), end_date.strip(), code, name)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 1029, in _setup_validation_template
+    colmap = _resolve_columns(df, _SETUP_REQUIRED)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 229, in _resolve_columns
+    raise ValueError(
+ValueError: Missing required column(s): MANDT, KUNNR, TERR_CODE, BEGDA, LEVEL1, LEVEL1_TERR, LEVEL2, LEVEL2_TERR, LEVEL3, LEVEL3_TERR, LEVEL4, LEVEL4_TERR, LEVEL5, LEVEL5_TERR, LEVEL6, LEVEL6_TERR, LEVEL7, LEVEL7_TERR, LEVEL8, LEVEL8_TERR, LEVEL10, LEVEL10_TERR, LEVEL11, LEVEL11_TERR, LEVEL12, LEVEL12_TERR, LEVEL13, LEVEL13_TERR, LEVEL14, LEVEL14_TERR, LEVEL15, LEVEL15_TERR. Available: Employee ID, Depot Code, MIO T. Code, Hierarchy Level, Division, Start Date, End Date, MIO/ SMIO, MIO T. Code_1, AM/ SAM, AM/ SAM T. Code, SAM, SAM T. Code, RSM, RSM T. Code, ASM, ASM T. Code, DSM, DSM T. Code, SM, SM T. Code, SSM, SSM T. Code, AGM, AGM T. Code, DGM, DGM T. Code, GM, GM T. Code, AD, AD T. Code
+

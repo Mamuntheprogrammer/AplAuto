@@ -90,7 +90,7 @@ def get_operation(name: str) -> OpSpec:
 DIVISIONS: dict[str, str] = {m.NAME: m.CODE for m in MODULES}
 DIVISION_OPTIONS: list[str] = [f"{name} ({code})" for name, code in DIVISIONS.items()]
 DIVISION_NAMES: dict[str, str] = {code: name for name, code in DIVISIONS.items()}
-Z_REPORTS: set[str] = {"ZDEPOTHEAD", "ZEMPLOYEE", "ZMIO_TARGET", "ZSD_MIO_PROD_TRG", "SETUP_VALIDATION"}
+Z_REPORTS: set[str] = {"ZDEPOTHEAD", "ZEMPLOYEE", "ZMIO_TARGET", "ZMIO_TARGET_HB", "ZSD_MIO_PROD_TRG", "SETUP_VALIDATION"}
 
 DATE_FMT = "%d.%m.%Y"
 
@@ -465,7 +465,7 @@ def _zemployee_template(
     bad_eq_em: list[str] = []    # own-level ID must equal col1
     bad_eq_terr: list[str] = []  # own-level terr must equal col3
     seen_keys: dict[str, int] = {}
-    dup_rows: set[int] = []
+    dup_rows: set[int] = set()
     kept_rows: list[tuple[str, str, str, str, list[tuple[str, str]]]] = []
     skipped = 0
 
@@ -633,7 +633,8 @@ def op_zmio_target(
 #   col5 Start | col6 End | col7 Target Value | col8 Currency.
 # Pharma has TWO file variants, auto-detected from the col7 header text.
 def _zmio_target_template(
-    df: pd.DataFrame, start_date: str, end_date: str, div_code: str, div_name: str
+    df: pd.DataFrame, start_date: str, end_date: str, div_code: str, div_name: str,
+    tag: str = "ZMIO_TARGET",
 ) -> pd.DataFrame:
     """Validate the target input, then build the target upload template."""
     # 0. Resolve the header row (anchor on headers common to all variants).
@@ -654,7 +655,7 @@ def _zmio_target_template(
     work = work[kept]
     if len(work.columns) < 8:
         raise ValueError(
-            f"Expected 8 columns for ZMIO_TARGET ({div_name}), "
+            f"Expected 8 columns for {tag} ({div_name}), "
             f"found {len(work.columns)}."
         )
     cols = list(work.columns)[:8]
@@ -718,7 +719,7 @@ def _zmio_target_template(
         issues.append(f"Col7 Target Value must be numeric (rows: {_rows(bad_val)})")
     if issues:
         raise ValueError(
-            f"ZMIO_TARGET validation failed ({label}):\n" + "\n".join(f"- {i}" for i in issues)
+            f"{tag} validation failed ({label}):\n" + "\n".join(f"- {i}" for i in issues)
         )
     if not parsed:
         raise ValueError("No data rows found (every row is blank).")
@@ -740,11 +741,40 @@ def _zmio_target_template(
     summary = f"Input sum: {in_sum:,.2f} | Output sum: {out_sum:,.2f} | Diff: {diff:,.2f}"
     if skipped:
         summary += f" | {skipped} ignored row(s)"
-    print(f"[ZMIO_TARGET] {label} template built: {len(template)} rows "
+    print(f"[{tag}] {label} template built: {len(template)} rows "
           f"({start_date} - {end_date}). {summary}")
     template.attrs["variant"] = variant  # picked up for the export file name
     template.attrs["summary"] = summary  # shown in the status log
     return template
+
+
+def _z_params_pharma_only() -> list[ParamSpec]:
+    """Same Division + Start/End date params, but Division locked to Pharma (01)."""
+    params = _z_params()
+    for p in params:
+        if p.name == "divisions":
+            p.options = ["Pharma (01)"]
+    return params
+
+
+@register("ZMIO_TARGET_HB", "MIO target HB template — Pharma only (same rules as ZMIO_TARGET).",
+          _z_params_pharma_only())
+def op_zmio_target_hb(
+    df: pd.DataFrame, divisions: list[str] | str = "",
+    start_date: str = "", end_date: str = "", **_: object,
+) -> pd.DataFrame:
+    """ZMIO_TARGET_HB: exact copy of ZMIO_TARGET, restricted to Pharma (01)."""
+    codes = division_codes(divisions)
+    if not codes:
+        raise ValueError("Select a Division radio option.")
+    validate_period(start_date, end_date)
+    code = codes[0]
+    if code != "01":
+        raise ValueError("ZMIO_TARGET_HB is Pharma (01) only — select Pharma (01).")
+    name = DIVISION_NAMES.get(code, code)
+    return _zmio_target_template(
+        df, start_date.strip(), end_date.strip(), code, name, tag="ZMIO_TARGET_HB",
+    )
 
 
 @register("ZSD_MIO_PROD_TRG", "MIO product target — mvke/zemp lookups, build template.", _z_params())

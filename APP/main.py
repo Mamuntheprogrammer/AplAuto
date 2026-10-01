@@ -399,7 +399,10 @@ class SetupPage(ctk.CTkFrame):
         ctk.CTkButton(btns, text="Cancel", width=120, fg_color="#3a3a3a",
                       command=_cancel).pack(side="left", padx=8)
         dialog.protocol("WM_DELETE_WINDOW", _cancel)
-        root.wait_window(dialog)
+        try:
+            root.wait_window(dialog)
+        except tk.TclError:  # noqa: BLE001 - window torn down mid-confirm
+            return False
         return bool(confirmed)
 
     def on_apply(self, op_name: str, params: dict[str, Any]) -> None:
@@ -461,6 +464,10 @@ class SetupPage(ctk.CTkFrame):
             else:
                 self.log("error", f"'{op_name}' failed: {error}")
                 logging.error("Operation %s failed:\n%s", op_name, self._last_tb)
+                show_error_dialog(
+                    self.winfo_toplevel(), f"{op_name} — unexpected error",
+                    f"{error}\n\nTraceback:\n{self._last_tb}",
+                )
             return
         if not isinstance(result, pd.DataFrame) or result.empty:
             self.log("warning", f"'{op_name}' returned no rows — result view unchanged.")

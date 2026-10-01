@@ -32,24 +32,42 @@ def show_error_dialog(parent: ctk.CTkBaseClass, title: str, message: str) -> Non
     copy_btn = ctk.CTkButton(btns, text="⧉ Copy", width=120, fg_color="#1f6aa5",
                              hover_color="#185a8d")
 
+    reset_id: list = [None]
+
     def _copy() -> None:
         dialog.clipboard_clear()
         dialog.clipboard_append(message)
         copy_btn.configure(text="✓ Copied")
 
         def _reset() -> None:
+            reset_id[0] = None
             try:
                 if copy_btn.winfo_exists():
                     copy_btn.configure(text="⧉ Copy")
             except Exception:  # noqa: BLE001 - dialog already closed
                 pass
 
-        dialog.after(1500, _reset)
+        try:
+            reset_id[0] = dialog.after(1500, _reset)
+        except Exception:  # noqa: BLE001 - dialog already closing
+            pass
+
+    def _close() -> None:
+        try:
+            if reset_id[0] is not None:
+                dialog.after_cancel(reset_id[0])
+        except Exception:  # noqa: BLE001 - already fired / dialog gone
+            pass
+        try:
+            dialog.destroy()
+        except Exception:  # noqa: BLE001
+            pass
 
     copy_btn.configure(command=_copy)
     copy_btn.pack(side="left", padx=8)
     ctk.CTkButton(btns, text="Close", width=120, fg_color="#3a3a3a",
-                  hover_color="#4a4a4a", command=dialog.destroy).pack(side="left", padx=8)
+                  hover_color="#4a4a4a", command=_close).pack(side="left", padx=8)
+    dialog.protocol("WM_DELETE_WINDOW", _close)
 
     dialog.transient(parent)
     dialog.grab_set()
