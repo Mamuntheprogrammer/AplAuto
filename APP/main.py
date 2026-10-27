@@ -405,6 +405,41 @@ class SetupPage(ctk.CTkFrame):
             return False
         return bool(confirmed)
 
+    def _ask_file_type(self) -> str:
+        """Modal popup: which SETUP_VALIDATION file type? '' if cancelled."""
+        root = self.winfo_toplevel()
+        dialog = ctk.CTkToplevel(root)
+        dialog.title("Select File Type")
+        center_over(dialog, root, 420, 240)
+        dialog.resizable(False, False)
+        dialog.transient(root)
+        dialog.grab_set()
+        ctk.CTkLabel(dialog, text="SETUP_VALIDATION", font=("Segoe UI", 14, "bold")).pack(pady=(16, 4))
+        ctk.CTkLabel(
+            dialog, text="Which file are you validating?",
+            font=("Segoe UI", 12),
+        ).pack(pady=(0, 14))
+        choice: list[str] = []
+
+        def _pick(value: str) -> None:
+            choice.append(value)
+            dialog.destroy()
+
+        btns = ctk.CTkFrame(dialog, fg_color="transparent")
+        btns.pack(pady=6)
+        ctk.CTkButton(btns, text="Script Generated", width=160, fg_color="#1f6aa5",
+                      command=lambda: _pick("Script Generated")).pack(side="left", padx=8)
+        ctk.CTkButton(btns, text="System Generated", width=160, fg_color="#1f6aa5",
+                      command=lambda: _pick("System Generated")).pack(side="left", padx=8)
+        ctk.CTkButton(dialog, text="Cancel", width=120, fg_color="#3a3a3a",
+                      command=dialog.destroy).pack(pady=(12, 16))
+        dialog.protocol("WM_DELETE_WINDOW", dialog.destroy)
+        try:
+            root.wait_window(dialog)
+        except tk.TclError:  # noqa: BLE001 - window torn down mid-confirm
+            return ""
+        return choice[0] if choice else ""
+
     def on_apply(self, op_name: str, params: dict[str, Any]) -> None:
         """Validate params, then run the operation in background with a loader."""
         if self._busy_overlay is not None:
@@ -414,26 +449,35 @@ class SetupPage(ctk.CTkFrame):
             self.log("warning", "Import a file with data before applying an operation.")
             return
         spec = get_operation(op_name)
+        # SETUP_VALIDATION: popup asking which file type is being validated.
+        file_type = ""
+        if op_name == "SETUP_VALIDATION":
+            file_type = self._ask_file_type()
+            if not file_type:
+                self.log("info", "'SETUP_VALIDATION' cancelled by user.")
+                return
+            params["file_type"] = file_type
         # Z-reports: Division + same-month Start/End dates are mandatory.
         if op_name in Z_REPORTS:
             divisions = params.get("divisions", [])
             if not divisions:
                 self.log("warning", f"'{op_name}': select a Division radio option.")
                 return
-            start = str(params.get("start_date", "")).strip()
-            end = str(params.get("end_date", "")).strip()
-            if not start or not end:
-                self.log("warning", f"'{op_name}': Start and End date are required (DD.MM.YYYY).")
-                return
-            try:
-                validate_period(start, end)
-                label = period_month_label(start, end)
-            except ValueError as exc:
-                self.log("warning", f"'{op_name}': {exc}")
-                return
-            if not self._confirm_period(op_name, start, end, divisions):  # type: ignore[arg-type]
-                self.log("info", f"'{op_name}' cancelled by user.")
-                return
+            if file_type != "System Generated":
+                start = str(params.get("start_date", "")).strip()
+                end = str(params.get("end_date", "")).strip()
+                if not start or not end:
+                    self.log("warning", f"'{op_name}': Start and End date are required (DD.MM.YYYY).")
+                    return
+                try:
+                    validate_period(start, end)
+                    label = period_month_label(start, end)
+                except ValueError as exc:
+                    self.log("warning", f"'{op_name}': {exc}")
+                    return
+                if not self._confirm_period(op_name, start, end, divisions):  # type: ignore[arg-type]
+                    self.log("info", f"'{op_name}' cancelled by user.")
+                    return
         if op_name in Z_REPORTS:  # reference files (mvke/zemp) live next to the input
             params["input_dir"] = str(Path(self.file_path).parent) if self.file_path else ""
         missing = [

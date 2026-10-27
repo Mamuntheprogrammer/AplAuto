@@ -406,7 +406,7 @@ ZEMPLOYEE_EXPECTED_COLS = {m.CODE: m.EMPLOYEE_COLS for m in MODULES}
 ZEMPLOYEE_SUFFIX = {m.CODE: set(m.EMPLOYEE_SUFFIX) for m in MODULES}
 # Output LEVEL slots in order, filled sequentially from input pairs starting
 # at input col 8. LEVEL9 is intentionally omitted (per template spec).
-ZEMPLOYEE_LEVEL_SLOTS = [1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15]
+ZEMPLOYEE_LEVEL_SLOTS = [1, 2, 3, 4, 5, 6, 7, 8,9, 10, 11, 12, 13, 14, 15]
 
 
 def _to_de_date_str(value: object) -> str:
@@ -974,15 +974,20 @@ def _zsd_template(
 # DIVISION/BEGDA/ENDDA/HIERARCHY_LEVEL/LEVELn/LEVELn_TERR). LEVEL9 omitted.
 _SETUP_LEVEL_SLOTS = [1, 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15]
 _SETUP_TERR_SUFFIX: dict[str, tuple[str, ...]] = {
-    "01": ("-A", "-B", "-C", "-P"),
+    "01": ("-A", "-B", "-C", "-P","P",),
     "02": ("-G",),
     "03": ("-N",),
     "04": ("-V",),
     "09": ("-L",),
     "11": ("-D",),
 }
-_SETUP_H4_PREFIX: dict[str, str] = {
-    "01": "RP", "02": "RG", "03": "RN", "04": "RV", "09": "RL", "11": "RD",
+_SETUP_H4_PREFIX: dict[str, tuple[str, ...]] = {
+    "01": ("RP", "MT"),
+    "02": ("RG",),
+    "03": ("RN",),
+    "04": ("RV",),
+    "09": ("RL",),
+    "11": ("RD",),
 }
 _SETUP_REQUIRED = (
     ["MANDT", "KUNNR", "DEPOT", "TERR_CODE", "DIVISION",
@@ -990,43 +995,103 @@ _SETUP_REQUIRED = (
     + [c for lv in _SETUP_LEVEL_SLOTS for c in (f"LEVEL{lv}", f"LEVEL{lv}_TERR")]
 )
 # Placeholder employee: exempt from the one-KUNNR-one-TERR_CODE rule
-# and from the misplaced-LEVEL check.
+# and from the misplaced-LEVEL check. Any code containing "VAC" is
+# treated the same way.
 _SETUP_EXEMPT_KUNNR = "EM00000000"
-# All hierarchy levels incl. 9 (9 has no output slot but must still be
+
+
+def _setup_emp_exempt(em: str) -> bool:
+    """True for EM00000000 or any employee code containing "VAC"."""
+    u = (em or "").strip().upper()
+    return u == _SETUP_EXEMPT_KUNNR or "VAC" in u
+
 # scanned for misplaced KUNNR/TERR_CODE values).
 _SETUP_ALL_LEVELS = list(range(1, 16))
+
+# System Generated file: same column ORDER as the script file but without
+# MANDT, and many columns share duplicate/generic header names (several
+# "Level", several "Industry code 1") — so they are renamed POSITIONALLY
+# to the script names before the shared validation runs. The system file
+# DOES include the LEVEL9 pair (37 columns total = 7 base + 15 pairs).
+_SYSTEM_FILE_COLUMNS: list[str] = (
+    ["KUNNR", "DEPOT", "TERR_CODE", "DIVISION", "BEGDA", "ENDDA", "HIERARCHY_LEVEL"]
+    + [c for lv in _SETUP_ALL_LEVELS for c in (f"LEVEL{lv}", f"LEVEL{lv}_TERR")]
+)
+
+
+def _rename_system_columns(df: pd.DataFrame) -> pd.DataFrame:
+    """Rename System Generated columns positionally to the script names."""
+    expected = len(_SYSTEM_FILE_COLUMNS)
+    if len(df.columns) != expected:
+        raise ValueError(
+            f"System Generated file must have exactly {expected} columns in order "
+            "Employee, Plant, Industry code 1, Division, Start Date, End Date, "
+            "Hierarchy lvl, then 15 Level / Level Terr pairs (LEVEL1..LEVEL15, "
+            f"including LEVEL9) — found {len(df.columns)}: "
+            f"{', '.join(map(str, df.columns[:8]))}…"
+        )
+    out = df.copy()
+    out.columns = list(_SYSTEM_FILE_COLUMNS)
+    return out
+
+
+# def _setup_terr_ok(terr: str, div: str, is_h4: bool) -> bool:
+#     """Division territory rule: H4 = RP/RG/.. prefix, else -X suffix."""
+#     t = (terr or "").strip().upper()
+#     if len(t) != 7:
+#         return False
+#     if is_h4:
+#         return t.startswith(_SETUP_H4_PREFIX.get(div, ""))
+#     return t[-2:] in _SETUP_TERR_SUFFIX.get(div, ())
 
 
 def _setup_terr_ok(terr: str, div: str, is_h4: bool) -> bool:
     """Division territory rule: H4 = RP/RG/.. prefix, else -X suffix."""
     t = (terr or "").strip().upper()
+
     if len(t) != 7:
         return False
-    if is_h4:
-        return t.startswith(_SETUP_H4_PREFIX.get(div, ""))
-    return t[-2:] in _SETUP_TERR_SUFFIX.get(div, ())
 
+    if is_h4:
+        prefixes = _SETUP_H4_PREFIX.get(div, ())
+        return any(t.startswith(prefix) for prefix in prefixes)
+
+    return t[-2:] in _SETUP_TERR_SUFFIX.get(div, ())
 
 @register("SETUP_VALIDATION", "Setup file check — validate built ZEMPLOYEE file.", _z_params())
 def op_setup_validation(
     df: pd.DataFrame, divisions: list[str] | str = "",
-    start_date: str = "", end_date: str = "", **_: object,
+    start_date: str = "", end_date: str = "", file_type: str = "",
+    **_: object,
 ) -> pd.DataFrame:
     """SETUP_VALIDATION: same params/flow as other Z-reports, returns df if OK."""
     codes = division_codes(divisions)
     if not codes:
         raise ValueError("Select a Division radio option.")
-    validate_period(start_date, end_date)
+    system = "system" in (file_type or "").strip().lower()
+    if system:
+        # System Generated: no MANDT column; Start/End dates not validated.
+        df = _rename_system_columns(df)
+    else:
+        validate_period(start_date, end_date)
     code = codes[0]
     name = DIVISION_NAMES.get(code, code)
-    return _setup_validation_template(df, start_date.strip(), end_date.strip(), code, name)
+    return _setup_validation_template(
+        df, start_date.strip(), end_date.strip(), code, name,
+        check_mandt=not system, check_dates=not system,
+    )
 
 
 def _setup_validation_template(
-    df: pd.DataFrame, start_date: str, end_date: str, div_code: str, div_name: str
+    df: pd.DataFrame, start_date: str, end_date: str, div_code: str, div_name: str,
+    check_mandt: bool = True, check_dates: bool = True,
 ) -> pd.DataFrame:
     """Validate every SETUP_VALIDATION rule; return df copy when all pass."""
-    colmap = _resolve_columns(df, _SETUP_REQUIRED)
+    required = [
+        c for c in _SETUP_REQUIRED
+        if (check_mandt or c != "MANDT") and (check_dates or c not in ("BEGDA", "ENDDA"))
+    ]
+    colmap = _resolve_columns(df, required)
     work = df.copy()
     g = lambda logical: colmap[logical]  # noqa: E731
 
@@ -1047,8 +1112,12 @@ def _setup_validation_template(
     bad_level_terr_rule: list[str] = []
     bad_misplaced_em: list[str] = []
     bad_misplaced_terr: list[str] = []
+    bad_occurrence: list[str] = []
+    bad_depot_occ: list[str] = []
     kunnr_terrs: dict[str, set[str]] = {}
     kunnr_terr_rows: dict[str, dict[str, list[int]]] = {}
+    level_em_terrs: dict[str, dict[str, list[int]]] = {}
+    level_terr_ems: dict[str, dict[str, list[int]]] = {}
     parent_map: dict[tuple[int, int], dict[str, set[str]]] = {}
     parent_rows: dict[tuple[int, int, str, str], list[int]] = {}
     # Actual LEVELn columns present in the file (also picks up LEVEL9
@@ -1060,20 +1129,50 @@ def _setup_validation_template(
         _tr = _norms.get(_norm_col(f"LEVEL{_lv}_TERR"))
         if _em is not None or _tr is not None:
             lvl_cols[_lv] = (_em, _tr)
+    # Occurrence counts per LEVELn employee column — used by the rule
+    # "employee with HIERARCHY_LEVEL >= 2 must appear at least twice in
+    # its own LEVELn column". Levels without a LEVELn column are skipped.
+    lvl_occ: dict[int, dict[str, int]] = {}
+    for _lv in _SETUP_ALL_LEVELS:
+        _em_col = lvl_cols.get(_lv, (None, None))[0]
+        if _em_col is None:
+            continue
+        _counts: dict[str, int] = {}
+        for _v in work[_em_col]:
+            _s = _to_clean_str(_v)
+            if _s:
+                _counts[_s] = _counts.get(_s, 0) + 1
+        lvl_occ[_lv] = _counts
+    # Per-(DEPOT, LEVELn) occurrence counts — used by the rule
+    # "employee with HIERARCHY_LEVEL 2 needs >= 1 occurrence and
+    # HIERARCHY_LEVEL > 2 needs > 1 occurrence of its KUNNR in its own
+    # LEVELn column, counted per DEPOT".
+    depot_lvl_occ: dict[tuple[str, int], dict[str, int]] = {}
+    _depot_vals = [_to_clean_str(v) for v in work[colmap["DEPOT"]]]
+    for _lv in _SETUP_ALL_LEVELS:
+        _em_col = lvl_cols.get(_lv, (None, None))[0]
+        if _em_col is None:
+            continue
+        for _d, _v in zip(_depot_vals, work[_em_col]):
+            _s = _to_clean_str(_v)
+            if _s:
+                _m = depot_lvl_occ.setdefault((_d, _lv), {})
+                _m[_s] = _m.get(_s, 0) + 1
 
     for idx, row in work.iterrows():
         r = int(idx) + 2  # type: ignore[arg-type]
-        mandt = _to_clean_str(row[g("MANDT")])
+        if check_mandt:
+            mandt = _to_clean_str(row[g("MANDT")])
+            if mandt != "300":
+                bad_mandt.append(r)
         kunnr = _to_clean_str(row[g("KUNNR")])
         depot = _to_clean_str(row[g("DEPOT")])
         terr = _to_clean_str(row[g("TERR_CODE")])
         div = _to_clean_str(row[g("DIVISION")]).zfill(2)
-        begda_s = _to_de_date_str(row[g("BEGDA")])
-        endda_s = _to_de_date_str(row[g("ENDDA")])
+        begda_s = _to_de_date_str(row[g("BEGDA")]) if check_dates else ""
+        endda_s = _to_de_date_str(row[g("ENDDA")]) if check_dates else ""
         hier_s = _to_clean_str(row[g("HIERARCHY_LEVEL")])
 
-        if mandt != "300":
-            bad_mandt.append(r)
         if div != div_code:
             bad_div.append(r)
         if not re.fullmatch(r"EM[A-Za-z0-9]{8}", kunnr):
@@ -1092,27 +1191,49 @@ def _setup_validation_template(
             bad_terr_len.append(r)
         elif not _setup_terr_ok(terr, div_code, hier == 4):
             bad_terr_rule.append(r)
-        try:
-            d_beg = parse_de_date(begda_s)
-            if begda_s != start_date or d_beg.day != 1:
+        d_beg: datetime | None = None
+        d_end: datetime | None = None
+        if check_dates:
+            try:
+                d_beg = parse_de_date(begda_s)
+                if begda_s != start_date or d_beg.day != 1:
+                    bad_begda.append(r)
+            except ValueError:
                 bad_begda.append(r)
-        except ValueError:
-            bad_begda.append(r)
-            d_beg = None  # type: ignore[assignment]
-        try:
-            d_end = parse_de_date(endda_s)
-            last = calendar.monthrange(d_end.year, d_end.month)[1]
-            if endda_s != end_date or d_end.day != last:
+            try:
+                d_end = parse_de_date(endda_s)
+                last = calendar.monthrange(d_end.year, d_end.month)[1]
+                if endda_s != end_date or d_end.day != last:
+                    bad_endda.append(r)
+            except ValueError:
                 bad_endda.append(r)
-        except ValueError:
-            bad_endda.append(r)
-            d_end = None  # type: ignore[assignment]
-        if d_beg is not None and d_end is not None:
-            if (d_beg.year, d_beg.month) != (d_end.year, d_end.month) or d_beg > d_end:
-                bad_period.append(r)
-        if kunnr and terr and kunnr.strip().upper() != _SETUP_EXEMPT_KUNNR:
+            if d_beg is not None and d_end is not None:
+                if (d_beg.year, d_beg.month) != (d_end.year, d_end.month) or d_beg > d_end:
+                    bad_period.append(r)
+        if kunnr and terr and not _setup_emp_exempt(kunnr):
             kunnr_terrs.setdefault(kunnr, set()).add(terr)
             kunnr_terr_rows.setdefault(kunnr, {}).setdefault(terr, []).append(r)
+        # HIERARCHY_LEVEL >= 2: the KUNNR must appear at least twice in its
+        # own LEVELn column file-wide (own row + at least one child row).
+        # EM00000000 / "VAC" codes are exempt; levels with no LEVELn column
+        # (e.g. LEVEL9 in script files) are skipped.
+        if hier_ok and hier >= 2 and kunnr and hier in lvl_occ \
+                and not _setup_emp_exempt(kunnr):
+            cnt = lvl_occ[hier].get(kunnr, 0)
+            if cnt < 2:
+                bad_occurrence.append(f"{r} (hier {hier}, {kunnr} appears {cnt}x in LEVEL{hier})")
+        # Per-DEPOT variant: count KUNNR occurrences in LEVEL{hier} among
+        # rows with the SAME DEPOT. hier 2 needs >= 1 (1 is valid);
+        # hier > 2 needs > 1 (1 occurrence is invalid). EM00000000 / "VAC"
+        # codes exempt; levels with no LEVELn column skipped.
+        if hier_ok and hier >= 2 and kunnr and (depot, hier) in depot_lvl_occ \
+                and not _setup_emp_exempt(kunnr):
+            cnt = depot_lvl_occ[(depot, hier)].get(kunnr, 0)
+            minimum = 1 if hier == 2 else 2
+            if cnt < minimum:
+                bad_depot_occ.append(
+                    f"{r} (hier {hier}, {kunnr} appears {cnt}x in LEVEL{hier} for depot {depot})"
+                )
 
         terrs: dict[int, str] = {}
         ems: dict[int, str] = {}
@@ -1139,13 +1260,26 @@ def _setup_validation_template(
         # KUNNR/TERR_CODE must sit ONLY in their own hierarchy slot —
         # e.g. hier 2 with KUNNR also in LEVEL1 (or TERR_CODE in
         # LEVEL1_TERR) is wrong. Placeholder EM00000000 is exempt.
-        if hier_ok and kunnr and kunnr.strip().upper() != _SETUP_EXEMPT_KUNNR:
+        if hier_ok and kunnr and not _setup_emp_exempt(kunnr):
             for lv, em in ems.items():
                 if lv != hier and em == kunnr:
                     bad_misplaced_em.append(f"{r} (hier {hier}, KUNNR also in LEVEL{lv})")
             for lv, t in terrs.items():
                 if lv != hier and t == terr:
                     bad_misplaced_terr.append(f"{r} (hier {hier}, TERR_CODE also in LEVEL{lv}_TERR)")
+        # LEVELn employee must map to exactly one LEVELn_TERR territory
+        # file-wide (and vice versa). EM00000000 and codes containing
+        # "VAC" are exempt.
+        for lv, em in ems.items():
+            if lv not in _SETUP_LEVEL_SLOTS:
+                continue
+            t = terrs.get(lv, "")
+            if not t:
+                continue
+            if _setup_emp_exempt(em):
+                continue
+            level_em_terrs.setdefault(em, {}).setdefault(t, []).append(r)
+            level_terr_ems.setdefault(t, {}).setdefault(em, []).append(r)
         for a, b in zip(_SETUP_LEVEL_SLOTS, _SETUP_LEVEL_SLOTS[1:]):
             ca, cb = terrs.get(a, ""), terrs.get(b, "")
             if ca and cb:
@@ -1218,6 +1352,51 @@ def _setup_validation_template(
             f"Each KUNNR must keep one TERR_CODE ({len(multi)} violators): "
             + "; ".join(parts)
             + ("…" if len(multi) > 5 else "")
+        )
+    bad_em_multi_terr: list[str] = []
+    for em, tmap in level_em_terrs.items():
+        if len(tmap) > 1:
+            terr_parts = [
+                f"{t} (rows: {', '.join(map(str, rows[:10]))})"
+                for t, rows in sorted(tmap.items())
+            ]
+            bad_em_multi_terr.append(f"{em}: {' vs '.join(terr_parts)}")
+    if bad_em_multi_terr:
+        issues.append(
+            "Each LEVELn employee must map to one LEVELn_TERR territory "
+            f"({len(bad_em_multi_terr)} violators): "
+            + "; ".join(bad_em_multi_terr[:5])
+            + ("…" if len(bad_em_multi_terr) > 5 else "")
+        )
+    bad_terr_multi_em: list[str] = []
+    for t, emap in level_terr_ems.items():
+        if len(emap) > 1:
+            em_parts = [
+                f"{em} (rows: {', '.join(map(str, rows[:10]))})"
+                for em, rows in sorted(emap.items())
+            ]
+            bad_terr_multi_em.append(f"{t}: {' vs '.join(em_parts)}")
+    if bad_terr_multi_em:
+        issues.append(
+            "Each LEVELn_TERR territory must map to one LEVELn employee "
+            f"({len(bad_terr_multi_em)} violators): "
+            + "; ".join(bad_terr_multi_em[:5])
+            + ("…" if len(bad_terr_multi_em) > 5 else "")
+        )
+    if bad_occurrence:
+        issues.append(
+            "Employee with HIERARCHY_LEVEL >= 2 must appear at least 2 times "
+            f"in its own LEVELn column ({len(bad_occurrence)} violators): "
+            + "; ".join(bad_occurrence[:5])
+            + ("…" if len(bad_occurrence) > 5 else "")
+        )
+    if bad_depot_occ:
+        issues.append(
+            "Per DEPOT: HIERARCHY_LEVEL 2 employee needs >= 1 and HIERARCHY_LEVEL "
+            "> 2 employee needs > 1 occurrence in its own LEVELn column "
+            f"({len(bad_depot_occ)} violators): "
+            + "; ".join(bad_depot_occ[:5])
+            + ("…" if len(bad_depot_occ) > 5 else "")
         )
     bad_parents: list[str] = []
     for (a, b), mapping in parent_map.items():

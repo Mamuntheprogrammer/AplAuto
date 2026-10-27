@@ -358,3 +358,375 @@ Traceback (most recent call last):
     raise ValueError(
 ValueError: Missing required column(s): MANDT, KUNNR, TERR_CODE, BEGDA, LEVEL1, LEVEL1_TERR, LEVEL2, LEVEL2_TERR, LEVEL3, LEVEL3_TERR, LEVEL4, LEVEL4_TERR, LEVEL5, LEVEL5_TERR, LEVEL6, LEVEL6_TERR, LEVEL7, LEVEL7_TERR, LEVEL8, LEVEL8_TERR, LEVEL10, LEVEL10_TERR, LEVEL11, LEVEL11_TERR, LEVEL12, LEVEL12_TERR, LEVEL13, LEVEL13_TERR, LEVEL14, LEVEL14_TERR, LEVEL15, LEVEL15_TERR. Available: Employee ID, Depot Code, MIO T. Code, Hierarchy Level, Division, Start Date, End Date, MIO/ SMIO, MIO T. Code_1, AM/ SAM, AM/ SAM T. Code, SAM, SAM T. Code, RSM, RSM T. Code, ASM, ASM T. Code, DSM, DSM T. Code, SM, SM T. Code, SSM, SSM T. Code, AGM, AGM T. Code, DGM, DGM T. Code, GM, GM T. Code, AD, AD T. Code
 
+2026-10-26 17:21:31,228 ERROR Operation SETUP_VALIDATION failed:
+Traceback (most recent call last):
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\main.py", line 217, in _target
+    state["result"] = worker()
+                      ^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\main.py", line 450, in <lambda>
+    lambda: spec.func(source, **params),
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 1022, in op_setup_validation
+    return _setup_validation_template(df, start_date.strip(), end_date.strip(), code, name)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 1029, in _setup_validation_template
+    colmap = _resolve_columns(df, _SETUP_REQUIRED)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 229, in _resolve_columns
+    raise ValueError(
+ValueError: Missing required column(s): MANDT, KUNNR, TERR_CODE, BEGDA, LEVEL1, LEVEL1_TERR, LEVEL2, LEVEL2_TERR, LEVEL3, LEVEL3_TERR, LEVEL4, LEVEL4_TERR, LEVEL5, LEVEL5_TERR, LEVEL6, LEVEL6_TERR, LEVEL7, LEVEL7_TERR, LEVEL8, LEVEL8_TERR, LEVEL10, LEVEL10_TERR, LEVEL11, LEVEL11_TERR, LEVEL12, LEVEL12_TERR, LEVEL13, LEVEL13_TERR, LEVEL14, LEVEL14_TERR, LEVEL15, LEVEL15_TERR. Available: client, Employee ID, Depot Code, MIO T. Code, Division, Start Date, End Date, Hierarchy Level, MIO/ SMIO, MIO T. Code_1, AM/ SAM, AM/ SAM T. Code, SAM, SAM T. Code, RSM, RSM T. Code, ASM, ASM T. Code, DSM, DSM T. Code, SM, SM T. Code, SSM, SSM T. Code, AGM, AGM T. Code, DGM, DGM T. Code, GM, GM T. Code, AD, AD T. Code, ED, ED T. Code
+
+2026-10-26 17:25:53,726 ERROR Operation SETUP_VALIDATION failed:
+Traceback (most recent call last):
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\main.py", line 217, in _target
+    state["result"] = worker()
+                      ^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\main.py", line 450, in <lambda>
+    lambda: spec.func(source, **params),
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 1022, in op_setup_validation
+    return _setup_validation_template(df, start_date.strip(), end_date.strip(), code, name)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 1243, in _setup_validation_template
+    raise ValueError(
+ValueError: SETUP_VALIDATION failed (Pharma):
+- TERR_CODE division rule failed — non-4 must end with 01:-A/-B/-C/-P 02:-G 03:-N 04:-V 09:-L 11:-D; level 4 must start with RP/RG/RN/RV/RL/RD (rows: 2358)
+- LEVELn_TERR division rule failed (row/level: 2358/L4)
+- Own-level LEVELn must equal KUNNR (row: 2410 (level 13), 2411 (level 13), 2412 (level 13), 2413 (level 13), 2414 (level 13), 2415 (level 13), 2416 (level 13), 2417 (level 13), 2418 (level 13), 2419 (level 13)…)
+- Own-level LEVELn_TERR must equal TERR_CODE (row: 2410 (level 13), 2411 (level 13), 2412 (level 13), 2413 (level 13), 2414 (level 13), 2415 (level 13), 2416 (level 13), 2417 (level 13), 2418 (level 13), 2419 (level 13)…)
+- KUNNR sits in a wrong LEVEL slot for its HIERARCHY_LEVEL (row: 2389 (hier 9, KUNNR also in LEVEL10), 2390 (hier 9, KUNNR also in LEVEL10), 2391 (hier 9, KUNNR also in LEVEL10), 2392 (hier 9, KUNNR also in LEVEL10), 2393 (hier 9, KUNNR also in LEVEL10), 2394 (hier 9, KUNNR also in LEVEL10), 2395 (hier 9, KUNNR also in LEVEL10), 2396 (hier 9, KUNNR also in LEVEL10), 2397 (hier 9, KUNNR also in LEVEL10), 2398 (hier 9, KUNNR also in LEVEL10)…)
+- TERR_CODE sits in a wrong LEVELn_TERR slot for its HIERARCHY_LEVEL (row: 2389 (hier 9, TERR_CODE also in LEVEL10_TERR), 2390 (hier 9, TERR_CODE also in LEVEL10_TERR), 2391 (hier 9, TERR_CODE also in LEVEL10_TERR), 2392 (hier 9, TERR_CODE also in LEVEL10_TERR), 2393 (hier 9, TERR_CODE also in LEVEL10_TERR), 2394 (hier 9, TERR_CODE also in LEVEL10_TERR), 2395 (hier 9, TERR_CODE also in LEVEL10_TERR), 2396 (hier 9, TERR_CODE also in LEVEL10_TERR), 2397 (hier 9, TERR_CODE also in LEVEL10_TERR), 2398 (hier 9, TERR_CODE also in LEVEL10_TERR)…)
+- Each KUNNR must keep one TERR_CODE (3 violators): EM000VAC01: MT711-C (rows: 2356) vs MY991-P (rows: 1619) vs UT710-P (rows: 1510) vs UT711-C (rows: 1509); EM000VAC02: MT710-P (rows: 2357) vs MY992-P (rows: 1628) vs UT720-P (rows: 1563) vs UT721-C (rows: 1562); EM000VAC03: MTRSM1P (rows: 2358) vs MY993-P (rows: 1643)
+
+2026-10-26 17:25:53,821 ERROR Ignored benign Tk teardown race: bad window path name ".!ctktoplevel7"
+2026-10-26 17:25:53,821 ERROR Ignored benign Tk teardown race: bad window path name ".!ctktoplevel7"
+2026-10-26 17:44:50,964 ERROR Operation SETUP_VALIDATION failed:
+Traceback (most recent call last):
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\main.py", line 217, in _target
+    state["result"] = worker()
+                      ^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\main.py", line 450, in <lambda>
+    lambda: spec.func(source, **params),
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 1040, in op_setup_validation
+    return _setup_validation_template(df, start_date.strip(), end_date.strip(), code, name)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 1149, in _setup_validation_template
+    elif lv in _SETUP_LEVEL_SLOTS and not _setup_terr_ok(t, div_code, lv == 4):
+                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 1023, in _setup_terr_ok
+    prefixes = _SETUP_H4_PREFIX.get(div, ())
+               ^^^^^^^^^^^^^^^^
+NameError: name '_SETUP_H4_PREFIX' is not defined
+
+2026-10-26 17:46:41,638 ERROR Operation SETUP_VALIDATION failed:
+Traceback (most recent call last):
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\main.py", line 217, in _target
+    state["result"] = worker()
+                      ^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\main.py", line 450, in <lambda>
+    lambda: spec.func(source, **params),
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 1040, in op_setup_validation
+    return _setup_validation_template(df, start_date.strip(), end_date.strip(), code, name)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 1261, in _setup_validation_template
+    raise ValueError(
+ValueError: SETUP_VALIDATION failed (Pharma):
+- Own-level LEVELn must equal KUNNR (row: 2410 (level 13), 2411 (level 13), 2412 (level 13), 2413 (level 13), 2414 (level 13), 2415 (level 13), 2416 (level 13), 2417 (level 13), 2418 (level 13), 2419 (level 13)…)
+- Own-level LEVELn_TERR must equal TERR_CODE (row: 2410 (level 13), 2411 (level 13), 2412 (level 13), 2413 (level 13), 2414 (level 13), 2415 (level 13), 2416 (level 13), 2417 (level 13), 2418 (level 13), 2419 (level 13)…)
+- KUNNR sits in a wrong LEVEL slot for its HIERARCHY_LEVEL (row: 2389 (hier 9, KUNNR also in LEVEL10), 2390 (hier 9, KUNNR also in LEVEL10), 2391 (hier 9, KUNNR also in LEVEL10), 2392 (hier 9, KUNNR also in LEVEL10), 2393 (hier 9, KUNNR also in LEVEL10), 2394 (hier 9, KUNNR also in LEVEL10), 2395 (hier 9, KUNNR also in LEVEL10), 2396 (hier 9, KUNNR also in LEVEL10), 2397 (hier 9, KUNNR also in LEVEL10), 2398 (hier 9, KUNNR also in LEVEL10)…)
+- TERR_CODE sits in a wrong LEVELn_TERR slot for its HIERARCHY_LEVEL (row: 2389 (hier 9, TERR_CODE also in LEVEL10_TERR), 2390 (hier 9, TERR_CODE also in LEVEL10_TERR), 2391 (hier 9, TERR_CODE also in LEVEL10_TERR), 2392 (hier 9, TERR_CODE also in LEVEL10_TERR), 2393 (hier 9, TERR_CODE also in LEVEL10_TERR), 2394 (hier 9, TERR_CODE also in LEVEL10_TERR), 2395 (hier 9, TERR_CODE also in LEVEL10_TERR), 2396 (hier 9, TERR_CODE also in LEVEL10_TERR), 2397 (hier 9, TERR_CODE also in LEVEL10_TERR), 2398 (hier 9, TERR_CODE also in LEVEL10_TERR)…)
+- Each KUNNR must keep one TERR_CODE (3 violators): EM000VAC01: MT711-C (rows: 2356) vs MY991-P (rows: 1619) vs UT710-P (rows: 1510) vs UT711-C (rows: 1509); EM000VAC02: MT710-P (rows: 2357) vs MY992-P (rows: 1628) vs UT720-P (rows: 1563) vs UT721-C (rows: 1562); EM000VAC03: MTRSM1P (rows: 2358) vs MY993-P (rows: 1643)
+
+2026-10-27 09:22:19,826 ERROR Operation SETUP_VALIDATION failed:
+Traceback (most recent call last):
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\main.py", line 217, in _target
+    state["result"] = worker()
+                      ^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\main.py", line 450, in <lambda>
+    lambda: spec.func(source, **params),
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 1040, in op_setup_validation
+    return _setup_validation_template(df, start_date.strip(), end_date.strip(), code, name)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 1047, in _setup_validation_template
+    colmap = _resolve_columns(df, _SETUP_REQUIRED)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 229, in _resolve_columns
+    raise ValueError(
+ValueError: Missing required column(s): MANDT, KUNNR, DEPOT, TERR_CODE, BEGDA, LEVEL5_TERR, LEVEL6_TERR, LEVEL7_TERR, LEVEL8_TERR, LEVEL10_TERR, LEVEL11_TERR, LEVEL12_TERR, LEVEL13_TERR, LEVEL14_TERR, LEVEL15, LEVEL15_TERR. Available: Client, Employee, Plant, Industry code 1, Division, Start Date, End Date, Hierarchy lvl, Level, Level1 Terr, Level_1, Level 2 Terr, Level_2, Level 3 Terr, Level_3, Level 4 Terr, Level_4, Industry code 1_1, Level_5, Industry code 1_2, Level_6, Industry code 1_3, Level_7, Industry code 1_4, Level_8, Industry code 1_5, Level_9, Industry code 1_6, Level_10, Industry code 1_7, Level_11, Industry code 1_8, Level_12, Industry code 1_9, Level_13, Industry code 1_10, Level_14, Industry code 1_11
+
+2026-10-27 09:24:34,508 ERROR Operation SETUP_VALIDATION failed:
+Traceback (most recent call last):
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\main.py", line 217, in _target
+    state["result"] = worker()
+                      ^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\main.py", line 450, in <lambda>
+    lambda: spec.func(source, **params),
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 1040, in op_setup_validation
+    return _setup_validation_template(df, start_date.strip(), end_date.strip(), code, name)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 1261, in _setup_validation_template
+    raise ValueError(
+ValueError: SETUP_VALIDATION failed (Pharma):
+- Own-level LEVELn must equal KUNNR (row: 2252 (level 13), 2253 (level 13), 2254 (level 13), 2255 (level 13), 2256 (level 13), 2257 (level 13), 2258 (level 13), 2259 (level 13), 2260 (level 13), 2261 (level 13)…)
+- Own-level LEVELn_TERR must equal TERR_CODE (row: 2252 (level 13), 2253 (level 13), 2254 (level 13), 2255 (level 13), 2256 (level 13), 2257 (level 13), 2258 (level 13), 2259 (level 13), 2260 (level 13), 2261 (level 13)…)
+- KUNNR sits in a wrong LEVEL slot for its HIERARCHY_LEVEL (row: 1534 (hier 9, KUNNR also in LEVEL10), 1535 (hier 9, KUNNR also in LEVEL10), 1536 (hier 9, KUNNR also in LEVEL10), 1537 (hier 9, KUNNR also in LEVEL10), 1538 (hier 9, KUNNR also in LEVEL10), 1539 (hier 9, KUNNR also in LEVEL10), 1540 (hier 9, KUNNR also in LEVEL10), 1541 (hier 9, KUNNR also in LEVEL10), 1542 (hier 9, KUNNR also in LEVEL10), 1543 (hier 9, KUNNR also in LEVEL10)…)
+- TERR_CODE sits in a wrong LEVELn_TERR slot for its HIERARCHY_LEVEL (row: 1534 (hier 9, TERR_CODE also in LEVEL10_TERR), 1535 (hier 9, TERR_CODE also in LEVEL10_TERR), 1536 (hier 9, TERR_CODE also in LEVEL10_TERR), 1537 (hier 9, TERR_CODE also in LEVEL10_TERR), 1538 (hier 9, TERR_CODE also in LEVEL10_TERR), 1539 (hier 9, TERR_CODE also in LEVEL10_TERR), 1540 (hier 9, TERR_CODE also in LEVEL10_TERR), 1541 (hier 9, TERR_CODE also in LEVEL10_TERR), 1542 (hier 9, TERR_CODE also in LEVEL10_TERR), 1543 (hier 9, TERR_CODE also in LEVEL10_TERR)…)
+- Each KUNNR must keep one TERR_CODE (3 violators): EM000VAC01: MT711-C (rows: 2460) vs MY991-P (rows: 2459) vs UT710-P (rows: 2457) vs UT711-C (rows: 2458); EM000VAC02: MT710-P (rows: 2464) vs MY992-P (rows: 2463) vs UT720-P (rows: 2461) vs UT721-C (rows: 2462); EM000VAC03: MTRSM1P (rows: 2466) vs MY993-P (rows: 2465)
+
+2026-10-27 09:24:34,605 ERROR Ignored benign Tk teardown race: bad window path name ".!ctktoplevel3"
+2026-10-27 09:24:34,606 ERROR Ignored benign Tk teardown race: bad window path name ".!ctktoplevel3"
+2026-10-27 09:34:58,275 ERROR Operation ZEMPLOYEE failed:
+Traceback (most recent call last):
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\main.py", line 217, in _target
+    state["result"] = worker()
+                      ^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\main.py", line 450, in <lambda>
+    lambda: spec.func(source, **params),
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 400, in op_zemployee
+    return _zemployee_template(df, start_date.strip(), end_date.strip(), code, name)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 574, in _zemployee_template
+    raise ValueError(
+ValueError: ZEMPLOYEE validation failed (Pharma):
+- Col1 Employee must be EM + 10 chars (rows: 2, 3, 4, 5, 6, 7, 8, 9, 10, 11…)
+- Col2 Depot must be 4-digit (rows: 2, 3, 4, 5, 6, 7, 8, 9, 10, 11…)
+- Col3 Terr must be 7 chars (rows: 2, 3, 4, 5, 6, 7, 8, 9, 10, 11…)
+- Col4 Hierarchy must be 1..15 (rows: 2, 3, 4, 5, 6, 7, 8, 9, 10, 11…)
+- Level ID cols must be EM + 10 chars when filled (row/level: 2/L1, 2/L2, 2/L3, 2/L5, 2/L7, 2/L10, 3/L1, 3/L2, 3/L3, 3/L5…)
+- Level terr cols must be 7 chars when filled (row/level: 2/L1, 2/L2, 2/L4, 2/L6, 2/L7, 2/L8, 2/L9, 2/L10, 2/L11, 2/L12…)
+- Col1+Col2+Col3 must be unique (duplicate rows: 6, 12, 15, 28, 38, 57, 59, 69, 73, 83)
+
+2026-10-27 09:34:58,354 ERROR Ignored benign Tk teardown race: bad window path name ".!ctktoplevel8"
+2026-10-27 09:34:58,360 ERROR Ignored benign Tk teardown race: bad window path name ".!ctktoplevel8"
+2026-10-27 09:36:45,950 ERROR Operation ZEMPLOYEE failed:
+Traceback (most recent call last):
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\main.py", line 217, in _target
+    state["result"] = worker()
+                      ^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\main.py", line 450, in <lambda>
+    lambda: spec.func(source, **params),
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 400, in op_zemployee
+    return _zemployee_template(df, start_date.strip(), end_date.strip(), code, name)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 574, in _zemployee_template
+    raise ValueError(
+ValueError: ZEMPLOYEE validation failed (Pharma):
+- Col6 Start must be 01.10.2026 (rows: 2, 3, 4, 5, 6, 7, 8, 9, 10, 11…)
+- Col7 End must be 31.10.2026 (rows: 2, 3, 4, 5, 6, 7, 8, 9, 10, 11…)
+
+2026-10-27 09:36:45,998 ERROR Ignored benign Tk teardown race: bad window path name ".!ctktoplevel13"
+2026-10-27 09:36:45,998 ERROR Ignored benign Tk teardown race: bad window path name ".!ctktoplevel13"
+2026-10-27 09:38:01,708 ERROR Operation ZEMPLOYEE failed:
+Traceback (most recent call last):
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\main.py", line 217, in _target
+    state["result"] = worker()
+                      ^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\main.py", line 450, in <lambda>
+    lambda: spec.func(source, **params),
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 400, in op_zemployee
+    return _zemployee_template(df, start_date.strip(), end_date.strip(), code, name)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 574, in _zemployee_template
+    raise ValueError(
+ValueError: ZEMPLOYEE validation failed (Pharma):
+- Col6 Start must be 01.10.2026 (rows: 2, 3, 4, 5, 6, 7, 8, 9, 10, 11…)
+- Col7 End must be 31.10.2026 (rows: 2, 3, 4, 5, 6, 7, 8, 9, 10, 11…)
+
+2026-10-27 09:39:34,066 ERROR Operation ZEMPLOYEE failed:
+Traceback (most recent call last):
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\main.py", line 217, in _target
+    state["result"] = worker()
+                      ^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\main.py", line 450, in <lambda>
+    lambda: spec.func(source, **params),
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 400, in op_zemployee
+    return _zemployee_template(df, start_date.strip(), end_date.strip(), code, name)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 574, in _zemployee_template
+    raise ValueError(
+ValueError: ZEMPLOYEE validation failed (Pharma):
+- Col6 Start must be 01.10.2026 (rows: 2, 3, 4, 5, 6, 7, 8, 9, 10, 11…)
+- Col7 End must be 31.10.2026 (rows: 2, 3, 4, 5, 6, 7, 8, 9, 10, 11…)
+
+2026-10-27 09:39:44,299 ERROR Operation ZEMPLOYEE failed:
+Traceback (most recent call last):
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\main.py", line 217, in _target
+    state["result"] = worker()
+                      ^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\main.py", line 450, in <lambda>
+    lambda: spec.func(source, **params),
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 400, in op_zemployee
+    return _zemployee_template(df, start_date.strip(), end_date.strip(), code, name)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 574, in _zemployee_template
+    raise ValueError(
+ValueError: ZEMPLOYEE validation failed (Pharma):
+- Col6 Start must be 01.09.2026 (rows: 919, 920, 921, 922, 923, 924, 925, 926, 927, 928…)
+- Col7 End must be 30.09.2026 (rows: 919, 920, 921, 922, 923, 924, 925, 926, 927, 928…)
+
+2026-10-27 09:53:43,353 ERROR Operation SETUP_VALIDATION failed:
+Traceback (most recent call last):
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\main.py", line 217, in _target
+    state["result"] = worker()
+                      ^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\main.py", line 450, in <lambda>
+    lambda: spec.func(source, **params),
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 1040, in op_setup_validation
+    return _setup_validation_template(df, start_date.strip(), end_date.strip(), code, name)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 1261, in _setup_validation_template
+    raise ValueError(
+ValueError: SETUP_VALIDATION failed (Pharma):
+- KUNNR sits in a wrong LEVEL slot for its HIERARCHY_LEVEL (row: 247 (hier 1, KUNNR also in LEVEL2), 446 (hier 1, KUNNR also in LEVEL2), 491 (hier 1, KUNNR also in LEVEL2), 743 (hier 1, KUNNR also in LEVEL2), 801 (hier 1, KUNNR also in LEVEL2), 858 (hier 1, KUNNR also in LEVEL2), 911 (hier 1, KUNNR also in LEVEL2), 1528 (hier 1, KUNNR also in LEVEL2), 1571 (hier 1, KUNNR also in LEVEL2), 1676 (hier 1, KUNNR also in LEVEL2)…)
+- Each KUNNR must keep one TERR_CODE (4 violators): EM000VAC01: BO710-P (rows: 248) vs BO711-C (rows: 247) vs CH710-P (rows: 744) vs CH711-C (rows: 743) vs CU710-P (rows: 2039) vs CU711-C (rows: 2038) vs CU721-C (rows: 2085) vs KH710-P (rows: 2211) vs KH711-C (rows: 2210) vs MT711-C (rows: 2375) vs MY710-P (rows: 1677) vs MY711-C (rows: 1676) vs MY991-P (rows: 1630) vs RN710-P (rows: 447) vs RN711-C (rows: 446) vs SY710-P (rows: 1824) vs SY711-C (rows: 1823) vs SY720-P (rows: 1871) vs SY721-C (rows: 1870) vs UT710-P (rows: 1529) vs UT711-C (rows: 1528); EM000VAC02: CH720-P (rows: 802) vs CH721-C (rows: 801) vs CU720-P (rows: 2086) vs MT710-P (rows: 2376) vs MY992-P (rows: 1639) vs RN720-P (rows: 492) vs RN721-C (rows: 491) vs UT720-P (rows: 1572) vs UT721-C (rows: 1571); EM000VAC03: CH730-P (rows: 859) vs CH731-C (rows: 858) vs MTRSM1P (rows: 2377) vs MY993-P (rows: 1654); EM000VAC04: CH740-P (rows: 912) vs CH741-C (rows: 911)
+
+2026-10-27 11:32:13,133 ERROR Operation SETUP_VALIDATION failed:
+Traceback (most recent call last):
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\main.py", line 217, in _target
+    state["result"] = worker()
+                      ^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\main.py", line 450, in <lambda>
+    lambda: spec.func(source, **params),
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 1040, in op_setup_validation
+    return _setup_validation_template(df, start_date.strip(), end_date.strip(), code, name)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 1307, in _setup_validation_template
+    raise ValueError(
+ValueError: SETUP_VALIDATION failed (Pharma):
+- Each LEVELn employee must map to one LEVELn_TERR territory (1 violators): EM00016295: ED001-P (rows: 4) vs PA182-A (rows: 965)
+- Each LEVELn_TERR territory must map to one LEVELn employee (1 violators): ED001-P: EM00016290 (rows: 2, 3, 5, 6, 7, 8, 9, 10, 11, 12) vs EM00016295 (rows: 4)
+
+2026-10-27 11:52:41,853 ERROR Operation SETUP_VALIDATION failed:
+Traceback (most recent call last):
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\main.py", line 217, in _target
+    state["result"] = worker()
+                      ^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\main.py", line 450, in <lambda>
+    lambda: spec.func(source, **params),
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 1040, in op_setup_validation
+    return _setup_validation_template(df, start_date.strip(), end_date.strip(), code, name)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 1307, in _setup_validation_template
+    raise ValueError(
+ValueError: SETUP_VALIDATION failed (Pharma):
+- MANDT must be 300 (rows: 2, 3, 4, 5, 6, 7, 8, 9, 10, 11…)
+- BEGDA must be 01.10.2026, first day of month (rows: 2399, 2400, 2401, 2402, 2403, 2404, 2405, 2406, 2407, 2408…)
+- ENDDA must be 31.10.2026, last day of month (rows: 2399, 2400, 2401, 2402, 2403, 2404, 2405, 2406, 2407, 2408…)
+- KUNNR sits in a wrong LEVEL slot for its HIERARCHY_LEVEL (row: 2458 (hier 1, KUNNR also in LEVEL2), 2462 (hier 1, KUNNR also in LEVEL2))
+- Each KUNNR must keep one TERR_CODE (3 violators): EM000VAC01: MT711-C (rows: 2460) vs MY991-P (rows: 2459) vs UT710-P (rows: 2457) vs UT711-C (rows: 2458); EM000VAC02: MT710-P (rows: 2464) vs MY992-P (rows: 2463) vs UT720-P (rows: 2461) vs UT721-C (rows: 2462); EM000VAC03: MTRSM1P (rows: 2466) vs MY993-P (rows: 2465)
+- Each LEVELn employee must map to one LEVELn_TERR territory (1 violators): EM00001761: DSM03-P (rows: 51, 52, 53, 54, 55, 178, 203, 216, 217, 221) vs DSM13-P (rows: 2459, 2463, 2465)
+
+2026-10-27 11:52:41,942 ERROR Ignored benign Tk teardown race: bad window path name ".!ctktoplevel3"
+2026-10-27 11:52:41,942 ERROR Ignored benign Tk teardown race: bad window path name ".!ctktoplevel3"
+2026-10-27 11:53:52,562 ERROR Operation SETUP_VALIDATION failed:
+Traceback (most recent call last):
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\main.py", line 217, in _target
+    state["result"] = worker()
+                      ^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\main.py", line 450, in <lambda>
+    lambda: spec.func(source, **params),
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 1040, in op_setup_validation
+    return _setup_validation_template(df, start_date.strip(), end_date.strip(), code, name)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 1307, in _setup_validation_template
+    raise ValueError(
+ValueError: SETUP_VALIDATION failed (Pharma):
+- KUNNR sits in a wrong LEVEL slot for its HIERARCHY_LEVEL (row: 2458 (hier 1, KUNNR also in LEVEL2), 2462 (hier 1, KUNNR also in LEVEL2))
+- Each KUNNR must keep one TERR_CODE (3 violators): EM000VAC01: MT711-C (rows: 2460) vs MY991-P (rows: 2459) vs UT710-P (rows: 2457) vs UT711-C (rows: 2458); EM000VAC02: MT710-P (rows: 2464) vs MY992-P (rows: 2463) vs UT720-P (rows: 2461) vs UT721-C (rows: 2462); EM000VAC03: MTRSM1P (rows: 2466) vs MY993-P (rows: 2465)
+- Each LEVELn employee must map to one LEVELn_TERR territory (1 violators): EM00001761: DSM03-P (rows: 51, 52, 53, 54, 55, 178, 203, 216, 217, 221) vs DSM13-P (rows: 2459, 2463, 2465)
+
+2026-10-27 11:53:52,641 ERROR Ignored benign Tk teardown race: bad window path name ".!ctktoplevel7"
+2026-10-27 11:53:52,641 ERROR Ignored benign Tk teardown race: bad window path name ".!ctktoplevel7"
+2026-10-27 12:04:01,801 ERROR Operation SETUP_VALIDATION failed:
+Traceback (most recent call last):
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\main.py", line 217, in _target
+    state["result"] = worker()
+                      ^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\main.py", line 450, in <lambda>
+    lambda: spec.func(source, **params),
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 1047, in op_setup_validation
+    return _setup_validation_template(df, start_date.strip(), end_date.strip(), code, name)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 1313, in _setup_validation_template
+    raise ValueError(
+ValueError: SETUP_VALIDATION failed (Pharma):
+- Each LEVELn employee must map to one LEVELn_TERR territory (1 violators): EM00001761: DSM03-P (rows: 51, 52, 53, 54, 55, 178, 203, 216, 217, 221) vs DSM13-P (rows: 2459, 2463, 2465)
+
+2026-10-27 12:39:38,649 ERROR Operation SETUP_VALIDATION failed:
+Traceback (most recent call last):
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\main.py", line 217, in _target
+    state["result"] = worker()
+                      ^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\main.py", line 494, in <lambda>
+    lambda: spec.func(source, **params),
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 1072, in op_setup_validation
+    df = _rename_system_columns(df)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 1025, in _rename_system_columns
+    raise ValueError(
+ValueError: System Generated file must have exactly 35 columns in order Employee, Plant, Industry code 1, Division, Start Date, End Date, Hierarchy lvl, then 14 Level / Level Terr pairs — found 37: Employee, Plant, Industry code 1, Division, Start Date, End Date, Hierarchy lvl, Level…
+
+2026-10-27 12:47:01,500 ERROR Operation SETUP_VALIDATION failed:
+Traceback (most recent call last):
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\main.py", line 217, in _target
+    state["result"] = worker()
+                      ^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\main.py", line 494, in <lambda>
+    lambda: spec.func(source, **params),
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 1079, in op_setup_validation
+    return _setup_validation_template(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 1355, in _setup_validation_template
+    raise ValueError(
+ValueError: SETUP_VALIDATION failed (Pharma):
+- Each LEVELn employee must map to one LEVELn_TERR territory (1 violators): EM00001761: DSM03-P (rows: 51, 52, 53, 54, 55, 178, 203, 216, 217, 221) vs DSM13-P (rows: 2459, 2463, 2465)
+
+2026-10-27 12:47:27,460 ERROR Operation SETUP_VALIDATION failed:
+Traceback (most recent call last):
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\main.py", line 217, in _target
+    state["result"] = worker()
+                      ^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\main.py", line 494, in <lambda>
+    lambda: spec.func(source, **params),
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 1079, in op_setup_validation
+    return _setup_validation_template(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 1355, in _setup_validation_template
+    raise ValueError(
+ValueError: SETUP_VALIDATION failed (Pharma):
+- Each LEVELn employee must map to one LEVELn_TERR territory (1 violators): EM00001761: DSM03-P (rows: 51, 52, 53, 54, 55, 178, 203, 216, 217, 221) vs DSM13-P (rows: 2459, 2463, 2465)
+
+2026-10-27 14:52:44,800 ERROR Operation SETUP_VALIDATION failed:
+Traceback (most recent call last):
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\main.py", line 217, in _target
+    state["result"] = worker()
+                      ^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\main.py", line 494, in <lambda>
+    lambda: spec.func(source, **params),
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 1079, in op_setup_validation
+    return _setup_validation_template(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 1422, in _setup_validation_template
+    raise ValueError(
+ValueError: SETUP_VALIDATION failed (Pharma):
+- Each LEVELn employee must map to one LEVELn_TERR territory (1 violators): EM00001761: DSM03-P (rows: 51, 52, 53, 54, 55, 178, 203, 216, 217, 221) vs DSM13-P (rows: 2459, 2463, 2465)
+- Per DEPOT: HIERARCHY_LEVEL 2 employee needs >= 1 and HIERARCHY_LEVEL > 2 employee needs > 1 occurrence in its own LEVELn column (1 violators): 250 (hier 6, EM00002527 appears 1x in LEVEL6 for depot 1313)
+
