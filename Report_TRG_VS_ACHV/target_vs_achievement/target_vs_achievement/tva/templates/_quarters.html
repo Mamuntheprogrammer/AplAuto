@@ -1,0 +1,25 @@
+{# Four quarter cards. Data comes from metrics.quarters() #}
+<div class="quarters" aria-label="Quarterly achievement">
+{% for q in quarters %}
+  {% if q.ach is none %}
+  <div class="q empty">
+    <div class="qh"><span class="qn">{{ q.name }}</span></div>
+    <div class="qv">–</div>
+    <div class="qsub">No data yet</div>
+  </div>
+  {% else %}
+  <div class="q">
+    <div class="qh"><span class="qn">{{ q.name }}</span><span class="qm">{{ q.span }}{% if q.current and q.partial %} <em>to date</em>{% elif q.partial %} <em>partial</em>{% endif %}</span></div>
+    <div class="qv {{ q.cls }}">{{ '%.1f'|format(q.ach) }}<small>%</small></div>
+    <div class="bar"><i class="{{ q.cls }}" style="width:{{ [q.ach, 100]|min }}%"></i></div>
+    <dl>
+      <div><dt>Target</dt><dd>{{ q.target|money }}</dd></div>
+      <div><dt>Sales</dt><dd>{{ q.sales|money }}</dd></div>
+    </dl>
+    {% if q.delta is not none %}
+    <span class="delta {{ 'up' if q.delta >= 0 else 'down' }}">{{ '▲' if q.delta >= 0 else '▼' }} {{ '%.1f'|format(q.delta|abs) }} pts vs prev. quarter</span>
+    {% endif %}
+  </div>
+  {% endif %}
+{% endfor %}
+</div>

@@ -1,0 +1,53 @@
+{# One data table. `t` is a dict built in render.py: label, own, count, rows #}
+<section class="block" id="{{ t.anchor }}">
+  <div class="bh">
+    <h2>{{ t.label }}{% if t.own %} <span class="self">(own figures)</span>{% endif %}</h2>
+    <span class="count">{{ t.count }} record{{ '' if t.count == 1 else 's' }}</span>
+    {% if t.count > 8 %}
+    <input class="search" type="search" placeholder="Search name, ID, depot or territory" aria-label="Search {{ t.label }}">
+    {% endif %}
+  </div>
+  <div class="scroll">
+    <table class="dt">
+      <thead>
+        <tr>
+          <th rowspan="2" class="id c0">Employee ID</th>
+          <th rowspan="2" class="id c1">Name</th>
+          <th rowspan="2" class="id">Depot Code</th>
+          <th rowspan="2" class="id">Depot Name</th>
+          <th rowspan="2" class="id">Territory</th>
+          {% for m in months %}<th colspan="3" class="mg{{ ' alt' if loop.index0 is odd }}">{{ m }}</th>{% endfor %}
+          <th colspan="3" class="mg tot">Total</th>
+        </tr>
+        <tr>
+          {% for m in months %}
+            {% set alt = ' alt' if loop.index0 is odd else '' %}
+            <th class="sub{{ alt }}">Target</th><th class="sub{{ alt }}">Sales</th><th class="sub{{ alt }}">Ach %</th>
+          {% endfor %}
+          <th class="sub tot">Target</th><th class="sub tot">Sales</th><th class="sub tot">Ach %</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for r in t.rows %}
+        {% set p = r.person %}
+        <tr>
+          <td class="id c0">{{ p.emp_id }}</td>
+          <td class="id c1">{{ p.name }}</td>
+          <td class="id">{{ p.depot_code if p.depot_code is not none }}</td>
+          <td class="id">{{ p.depot_name }}</td>
+          <td class="id">{{ p.territory }}</td>
+          {% for c in r.cells %}
+            {% set alt = ' alt' if loop.index0 is odd else '' %}
+            <td class="n{{ ' z' if c.target is none }}{{ alt }}">{{ c.target|money }}</td>
+            <td class="n{{ ' z' if c.sales is none }}{{ alt }}">{{ c.sales|money }}</td>
+            <td class="n a{{ alt }}">{% if c.ach is not none %}<b class="pill {{ c.cls }}">{{ '%.1f'|format(c.ach) }}%</b>{% else %}<span class="z">–</span>{% endif %}</td>
+          {% endfor %}
+          <td class="n tot">{{ p.total_target|money }}</td>
+          <td class="n tot">{{ p.total_sales|money }}</td>
+          <td class="n a tot">{% if p.total_ach is not none %}<b class="pill {{ r.total_cls }}">{{ '%.1f'|format(p.total_ach) }}%</b>{% else %}<span class="z">–</span>{% endif %}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>

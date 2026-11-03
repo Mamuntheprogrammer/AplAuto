@@ -730,3 +730,20 @@ ValueError: SETUP_VALIDATION failed (Pharma):
 - Each LEVELn employee must map to one LEVELn_TERR territory (1 violators): EM00001761: DSM03-P (rows: 51, 52, 53, 54, 55, 178, 203, 216, 217, 221) vs DSM13-P (rows: 2459, 2463, 2465)
 - Per DEPOT: HIERARCHY_LEVEL 2 employee needs >= 1 and HIERARCHY_LEVEL > 2 employee needs > 1 occurrence in its own LEVELn column (1 violators): 250 (hier 6, EM00002527 appears 1x in LEVEL6 for depot 1313)
 
+2026-10-27 17:55:39,378 ERROR Operation SETUP_VALIDATION failed:
+Traceback (most recent call last):
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\main.py", line 217, in _target
+    state["result"] = worker()
+                      ^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\main.py", line 494, in <lambda>
+    lambda: spec.func(source, **params),
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 1079, in op_setup_validation
+    return _setup_validation_template(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Abdullah\Desktop\DailyTask-Notebook\APP\operations.py", line 1422, in _setup_validation_template
+    raise ValueError(
+ValueError: SETUP_VALIDATION failed (Pharma):
+- Each LEVELn employee must map to one LEVELn_TERR territory (1 violators): EM00001761: DSM03-P (rows: 51, 52, 53, 54, 55, 178, 203, 216, 217, 221) vs DSM13-P (rows: 2459, 2463, 2465)
+- Per DEPOT: HIERARCHY_LEVEL 2 employee needs >= 1 and HIERARCHY_LEVEL > 2 employee needs > 1 occurrence in its own LEVELn column (1 violators): 250 (hier 6, EM00002527 appears 1x in LEVEL6 for depot 1313)
+

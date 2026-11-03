@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ cfg.COMPANY_NAME }} – report index</title>
+<style>
+{{ css }}
+</style>
+</head>
+<body>
+<header class="top"><div class="in">
+  <div><p class="co">{{ cfg.COMPANY_NAME }}</p><h1>{{ title }}</h1>
+  <p class="unit">{{ entries|length }} reports</p></div>
+</div></header>
+<main class="wrap">
+  <section class="block" style="margin-top:0">
+    <div class="bh">
+      <h2>All reports</h2>
+      <span class="count">{{ entries|length }} records</span>
+      <input class="search" type="search" placeholder="Search name, ID or territory" aria-label="Search reports">
+    </div>
+    <div class="scroll">
+      <table class="dt idx">
+        <thead>
+          <tr><th class="id c0">Employee ID</th><th class="id c1">Name</th><th class="id">Level</th><th class="id">Territory</th><th class="id">Depot Name</th><th>Team</th><th>Target</th><th>Sales</th><th>Ach %</th></tr>
+        </thead>
+        <tbody>
+        {% for r in entries %}
+          <tr>
+            <td class="id c0"><a href="{{ r.file }}">{{ r.emp_id }}</a></td>
+            <td class="id c1">{{ r.name }}</td>
+            <td class="id">{{ r.level }}</td>
+            <td class="id">{{ r.territory }}</td>
+            <td class="id">{{ r.depot }}</td>
+            <td class="n">{{ r.team }}</td>
+            <td class="n">{{ r.target|money }}</td>
+            <td class="n">{{ r.sales|money }}</td>
+            <td class="n">{% if r.ach is not none %}<b class="pill {{ r.cls }}">{{ '%.1f'|format(r.ach) }}%</b>{% else %}–{% endif %}</td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+  <div class="foot"><span>{{ cfg.COMPANY_NAME }}</span><span>Generated {{ generated }}</span></div>
+</main>
+<script>
+{{ js }}
+</script>
+</body>
+</html>
