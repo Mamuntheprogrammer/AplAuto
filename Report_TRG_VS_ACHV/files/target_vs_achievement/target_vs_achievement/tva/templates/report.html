@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ cfg.COMPANY_NAME }} – Target vs Achievement – {{ e.name }}</title>
+<style>
+{{ css }}
+</style>
+</head>
+<body>
+
+<header class="top"><div class="in">
+  <div>
+    <p class="co">{{ cfg.COMPANY_NAME }}</p>
+    <h1>{{ title }}</h1>
+    <p class="unit">{{ cfg.UNIT_NOTE }}</p>
+  </div>
+  <div class="who">
+    <div class="nm">{{ e.name }}</div>
+    <div class="meta">{{ e.emp_id }} · {{ level_label }} · Territory {{ e.territory }}{% if e.division is not none %} · Division {{ e.division }}{% endif %}</div>
+  </div>
+</div></header>
+
+<main class="wrap">
+
+  <div class="panel kpis">
+    <div class="kpi"><div class="l">Total target</div><div class="v">{{ e.total_target|money }}</div><div class="s">Jan–{{ last_month_name }} · Lac Tk</div></div>
+    <div class="kpi"><div class="l">Total achievement</div><div class="v">{{ e.total_sales|money }}</div>
+      <div class="s">{% if gap > 0 %}{{ gap|money }} below target{% elif gap < 0 %}{{ (-gap)|money }} above target{% else %}On target{% endif %}</div></div>
+    <div class="kpi"><div class="l">Overall achievement</div><div class="v brand">{% if e.total_ach is not none %}{{ '%.2f'|format(e.total_ach) }}<small>%</small>{% else %}–{% endif %}</div><div class="s">Year to date</div></div>
+    <div class="kpi"><div class="l">Best month</div>
+      {% if best is not none %}
+      <div class="v">{{ '%.1f'|format(best_ach) }}<small>%</small></div>
+      <div class="s">{{ best_name }}{% if kpi_trend is not none %} · {{ 'up' if kpi_trend >= 0 else 'down' }} {{ '%.1f'|format(kpi_trend|abs) }} pts since {{ first_month_name }}{% endif %}</div>
+      {% else %}<div class="v">–</div><div class="s">No monthly data</div>{% endif %}
+    </div>
+  </div>
+
+  {% if tables|selectattr('own', 'false')|list %}
+  <nav class="teamnav" aria-label="Team tables">
+    <span class="lbl">Team of {{ team_total }}</span>
+    {% for t in tables if not t.own %}
+    <a href="#{{ t.anchor }}"><b>{{ t.count }}</b> {{ t.label }}</a>
+    {% endfor %}
+  </nav>
+  {% endif %}
+
+  <section class="panel card">
+    <div class="ch">
+      <div><h2>Monthly achievement %</h2><p class="sub">Achievement against target, by month and quarter</p></div>
+      <div class="legend"><span><i></i>Monthly</span><span><i class="qa"></i>Quarter average</span><span><i class="t"></i>Target</span></div>
+    </div>
+    <div class="chartbox">{% include "_chart.html" %}</div>
+    {% include "_quarters.html" %}
+    <p class="note">Quarter achievement = quarter sales ÷ quarter target, for months with data. “pts” = percentage points.</p>
+  </section>
+
+  {% for t in tables %}
+    {% include "_table.html" %}
+  {% endfor %}
+
+  <div class="foot"><span>{{ cfg.COMPANY_NAME }}</span><span>Generated {{ generated }}</span></div>
+</main>
+
+<script>
+{{ js }}
+</script>
+</body>
+</html>

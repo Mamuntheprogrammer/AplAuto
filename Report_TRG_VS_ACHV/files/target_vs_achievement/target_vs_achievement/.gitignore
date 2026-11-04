@@ -1,0 +1,9 @@
+__pycache__/
+.pytest_cache/
+*.pyc
+output/*.html
+output/*.pdf
+output/manifest.csv
+gui_settings.json
+data/*.bak
+data/*.tmp

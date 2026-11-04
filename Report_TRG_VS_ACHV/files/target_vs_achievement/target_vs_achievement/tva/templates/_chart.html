@@ -1,0 +1,54 @@
+{# Line chart. Geometry comes from tva/charts.py, colours from static/report.css #}
+{% if chart.has_data %}
+<svg class="chart" viewBox="0 0 {{ chart.width }} {{ chart.height }}" role="img" aria-label="{{ chart.aria }}">
+  <defs>
+    <linearGradient id="fill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" class="fill-a"/><stop offset="1" class="fill-b"/>
+    </linearGradient>
+    <pattern id="hatch" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <line x1="0" y1="0" x2="0" y2="8" class="hatch-line"/>
+    </pattern>
+  </defs>
+
+  {# quarter bands #}
+  {% for b in chart.bands %}
+    {% if b.shaded %}<rect class="band" x="{{ b.x }}" y="{{ chart.top - 30 }}" width="{{ b.w }}" height="{{ chart.base - chart.top + 30 }}"/>{% endif %}
+    <text class="qlab" x="{{ b.cx }}" y="{{ chart.top - 12 }}" text-anchor="middle">{{ b.label }}</text>
+  {% endfor %}
+
+  {# months with no data yet #}
+  {% if chart.nodata %}
+    <rect x="{{ chart.nodata.x }}" y="{{ chart.top }}" width="{{ chart.nodata.w }}" height="{{ chart.base - chart.top }}" fill="url(#hatch)" opacity=".55"/>
+    <text class="nodata" x="{{ chart.nodata.cx }}" y="{{ chart.nodata.cy }}" text-anchor="middle">{{ chart.nodata.label }}</text>
+  {% endif %}
+
+  {# grid + y labels #}
+  {% for t in chart.ticks %}
+    {% if not t.is_target %}<line class="grid" x1="{{ chart.left }}" x2="{{ chart.right }}" y1="{{ t.y }}" y2="{{ t.y }}"/>{% endif %}
+    <text class="ytick" x="{{ chart.left - 10 }}" y="{{ t.y + 4 }}" text-anchor="end">{{ t.label }}</text>
+  {% endfor %}
+  <line class="target" x1="{{ chart.left }}" x2="{{ chart.right }}" y1="{{ chart.target_y }}" y2="{{ chart.target_y }}"/>
+  <text class="tlab" x="{{ chart.tlab_x }}" y="{{ chart.target_y - 7 }}" text-anchor="{{ chart.tlab_anchor }}">Target {{ '%g'|format(chart.target_value) }}%</text>
+
+  {# quarter averages #}
+  {% for a in chart.qavg %}
+    <line class="qavg" x1="{{ a.x1 }}" x2="{{ a.x2 }}" y1="{{ a.y }}" y2="{{ a.y }}"><title>{{ a.tip }}</title></line>
+  {% endfor %}
+
+  {# x labels #}
+  {% for m in chart.months %}
+    <text class="xtick{{ ' dim' if m.dim }}" x="{{ m.x }}" y="{{ chart.base + 24 }}" text-anchor="middle">{{ m.name }}</text>
+  {% endfor %}
+  <line class="axis" x1="{{ chart.left }}" x2="{{ chart.right }}" y1="{{ chart.base }}" y2="{{ chart.base }}"/>
+
+  {# monthly line #}
+  {% for d in chart.areas %}<path d="{{ d }}" fill="url(#fill)"/>{% endfor %}
+  {% for d in chart.lines %}<path class="mline" d="{{ d }}"/>{% endfor %}
+  {% for p in chart.points %}
+    <g class="pt"><circle class="dot" cx="{{ p.x }}" cy="{{ p.y }}" r="5"><title>{{ p.tip }}</title></circle>
+    <text class="vlab" x="{{ p.x }}" y="{{ p.y - 13 }}" text-anchor="middle">{{ p.label }}</text></g>
+  {% endfor %}
+</svg>
+{% else %}
+<p class="empty-note">No monthly achievement data yet for this employee.</p>
+{% endif %}
